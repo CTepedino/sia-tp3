@@ -1,8 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from datetime import datetime
 
 os.makedirs('results', exist_ok=True)
+timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+save_results = "results/result_"+timestamp
+os.makedirs(save_results)
 
 # Entradas originales
 X = np.array([
@@ -21,7 +25,7 @@ w = np.random.randn(2)
 learning_rate = 0.1
 epochs = 10
 
-def signo(x):
+def tita(x):
     return 1 if x >= 0 else -1
 
 def cantidad_diferencias(xi):
@@ -55,28 +59,29 @@ def plot_decision_boundary(X, y, w, epoch, iteration, save_path):
     plt.savefig(save_path)
     plt.close()
 
-# Control de la convergencia para evitar cambios innecesarios
-prev_w = w.copy()
-
 # Entrenamiento
 for epoch in range(epochs):
+    total_error = 0
     for iteration, (xi, target) in enumerate(zip(X, y)):
         xi_transf = np.array([1, cantidad_diferencias(xi)])  # Agregamos bias
-        output = signo(np.dot(w, xi_transf))
+        output = tita(np.dot(w, xi_transf))
+        delta = target - output
         if output != target:
             w += learning_rate * target * xi_transf
-        filename = f'results/epoch{epoch + 1}_iter{iteration + 1}.png'
+
+        filename = f'{save_results}/epoch{epoch + 1}_iter{iteration + 1}.png'
         plot_decision_boundary(X, y, w, epoch, iteration, filename)
+        total_error+= abs(delta)
+    
+    if total_error == 0:
+        print(f"Entrenamiento terminado en la epoca: {epoch+1}")
+        break
         
-    # if np.allclose(w, prev_w, atol=1e-3): 
-    #     print(f"Convergió en la época {epoch + 1}. No más actualizaciones.")
-    #     break
-    # prev_w = w.copy()
 
 
 # Prueba final
 print("Prueba final:")
 for xi in X:
     xi_transf = np.array([1, cantidad_diferencias(xi)])
-    output = signo(np.dot(w, xi_transf))
+    output = tita(np.dot(w, xi_transf))
     print(f"Entrada: {xi} -> Salida predicha: {output}")
