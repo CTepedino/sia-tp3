@@ -1,55 +1,68 @@
+import numpy as np
+import matplotlib.pyplot as plt
 import os
-import sys
-import cv2
 
-def crear_video(input_path, output_filename="video_output.mp4", fps=5):
-    archivos = sorted(
-        [f for f in os.listdir(input_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-    )
+os.makedirs('results', exist_ok=True)
+X = np.array([
+    [-1, -1],
+    [-1, 1],
+    [1, -1],
+    [1, 1]
+])
 
-    if not archivos:
-        print("No se encontraron imágenes en el directorio.")
-        return
+# Salidas
+y = np.array([-1, -1, -1, 1])
 
-    primer_frame = cv2.imread(os.path.join(input_path, archivos[0]))
-    if primer_frame is None:
-        print("No se pudo leer la primera imagen.")
-        return
+# bias como w[0])
+w = np.random.randn(X.shape[1] + 1)
 
-    height, width, _ = primer_frame.shape
+learning_rate = 0.1
+epochs = 10
 
-    # Usa AVI seguro
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    if not output_filename.endswith('.avi'):
-        output_filename = output_filename.rsplit('.', 1)[0] + '.avi'
 
-    out = cv2.VideoWriter(output_filename, fourcc, fps, (width, height))
+def signo(x):
+    return 1 if x >= 0 else -1
 
-    for archivo in archivos:
-        img_path = os.path.join(input_path, archivo)
-        frame = cv2.imread(img_path)
 
-        if frame is None:
-            print(f"Advertencia: no se pudo leer {img_path}. Saltando.")
-            continue
+def plot_decision_boundary(X, y, w, epoch, iteration, save_path):
+    plt.clf()
+    for i in range(len(X)):
+        if y[i] == 1:
+            plt.scatter(X[i, 0], X[i, 1], c='b', marker='o', label='Clase +1' if i == 0 else "")
+        else:
+            plt.scatter(X[i, 0], X[i, 1], c='r', marker='x', label='Clase -1' if i == 0 else "")
 
-        # Redimensionar por si hay algún frame de distinto tamaño
-        frame = cv2.resize(frame, (width, height))
-        out.write(frame)
+    x_vals = np.linspace(-2, 2, 100)
 
-    out.release()
-    print(f"Video guardado como: {output_filename}")
+    if w[2] != 0:
+        y_vals = -(w[1] * x_vals + w[0]) / w[2]
+        plt.plot(x_vals, y_vals, 'k-')
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Uso: python crear_video.py <carpeta_imagenes> [nombre_salida]")
-        sys.exit(1)
+    plt.xlim(-2, 2)
+    plt.ylim(-2, 2)
+    plt.title(f'Epoch {epoch + 1}, Iteración {iteration + 1}')
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.legend()
+    plt.grid(True)
 
-    input_path = sys.argv[1]
+    plt.savefig(save_path)
+    plt.close()
 
-    if len(sys.argv) >= 3:
-        output_filename = sys.argv[2]
-    else:
-        output_filename = "video_output.avi"
 
-    crear_video(input_path, output_filename)
+# Entrenamiento
+for epoch in range(epochs):
+    for iteration, (xi, target) in enumerate(zip(X, y)):
+        xi_ext = np.insert(xi, 0, 1)
+        output = signo(np.dot(w, xi_ext))
+        if output != target:
+            w += learning_rate * target * xi_ext
+        filename = f'results/epoch{epoch + 1}_iter{iteration + 1}.png'
+        plot_decision_boundary(X, y, w, epoch, iteration, filename)
+
+# Prueba final
+print("\nPrueba final:")
+for xi in X:
+    xi_ext = np.insert(xi, 0, 1)
+    output = signo(np.dot(w, xi_ext))
+    print(f"Entrada: {xi} -> Salida predicha: {output}")
