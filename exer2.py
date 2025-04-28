@@ -88,20 +88,21 @@ print(f"Perceptrón No Lineal - Error en Train: {train_error_nolineal:.6f}, Erro
 
 
 # ---------- Graficar curvas de aprendizaje ----------
-os.makedirs('results_json', exist_ok=True)
-os.makedirs('results', exist_ok=True)
 timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-filename = f'results/learning_curves_{timestamp}.png'
+os.makedirs('results', exist_ok=True)
+root ='results/results_ex2_'+timestamp
+os.makedirs(root)
+filename = f'{root}/learning_curves.png'
 
 output_data = {
     "train_error_lineal": round(train_error_lineal, 6),
     "test_error_lineal": round(test_error_lineal, 6),
-    "train_error_nolineal": round(train_error_nolineal, 6),
-    "test_error_nolineal": round(test_error_nolineal, 6)
+    "train_error_no_lineal": round(train_error_nolineal, 6),
+    "test_error_no_lineal": round(test_error_nolineal, 6)
 }
 
 # Nombre del archivo
-output_filename = f'results_json/output_ex2_{timestamp}.json'
+output_filename = f'{root}/output_ex2.json'
 
 # Guardar el JSON
 with open(output_filename, 'w') as f:
@@ -118,4 +119,4 @@ plt.title('Curva de aprendizaje')
 plt.legend()
 plt.grid(True)
 plt.savefig(filename)
-plt.show()
+# plt.show()
