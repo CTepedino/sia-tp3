@@ -174,3 +174,5 @@ Pipfile.lock
 # results
 /results
 /results/*
+/results_json
+/results_json/*
