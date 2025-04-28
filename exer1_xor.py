@@ -68,10 +68,10 @@ for epoch in range(epochs):
         filename = f'results/epoch{epoch + 1}_iter{iteration + 1}.png'
         plot_decision_boundary(X, y, w, epoch, iteration, filename)
         
-    if np.allclose(w, prev_w, atol=1e-3): 
-        print(f"Convergió en la época {epoch + 1}. No más actualizaciones.")
-        break
-    prev_w = w.copy()
+    # if np.allclose(w, prev_w, atol=1e-3): 
+    #     print(f"Convergió en la época {epoch + 1}. No más actualizaciones.")
+    #     break
+    # prev_w = w.copy()
 
 
 # Prueba final
