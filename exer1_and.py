@@ -18,7 +18,7 @@ X = np.array([
 y = np.array([-1, -1, -1, 1])
 
 # bias como w[0])
-w = np.random.randn(X.shape[1] + 1)
+w = np.random.uniform(0,3,X.shape[1] + 1)
 
 learning_rate = 0.1
 max_epochs = 100
