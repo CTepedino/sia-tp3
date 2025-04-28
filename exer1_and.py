@@ -1,8 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from datetime import datetime
 
 os.makedirs('results', exist_ok=True)
+timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+save_results = "results/result_"+timestamp
+os.makedirs(save_results)
 X = np.array([
     [-1, -1],
     [-1, 1],
@@ -17,10 +21,10 @@ y = np.array([-1, -1, -1, 1])
 w = np.random.randn(X.shape[1] + 1)
 
 learning_rate = 0.1
-epochs = 10
+max_epochs = 100
 
 
-def signo(x):
+def tita(x):
     return 1 if x >= 0 else -1
 
 
@@ -51,18 +55,27 @@ def plot_decision_boundary(X, y, w, epoch, iteration, save_path):
 
 
 # Entrenamiento
-for epoch in range(epochs):
+for epoch in range(max_epochs):
+    total_error = 0
     for iteration, (xi, target) in enumerate(zip(X, y)):
         xi_ext = np.insert(xi, 0, 1)
-        output = signo(np.dot(w, xi_ext))
+        output = tita(np.dot(w, xi_ext))
+        delta = target - output
         if output != target:
             w += learning_rate * target * xi_ext
-        filename = f'results/epoch{epoch + 1}_iter{iteration + 1}.png'
+        filename = f'{save_results}/epoch{epoch + 1}_iter{iteration + 1}.png'
         plot_decision_boundary(X, y, w, epoch, iteration, filename)
+        total_error+= abs(delta)
+    
+    if total_error == 0:
+        print(f"Entrenamiento terminado en la epoca: {epoch+1}")
+        break
+            
+
 
 # Prueba final
 print("\nPrueba final:")
 for xi in X:
     xi_ext = np.insert(xi, 0, 1)
-    output = signo(np.dot(w, xi_ext))
+    output = tita(np.dot(w, xi_ext))
     print(f"Entrada: {xi} -> Salida predicha: {output}")
