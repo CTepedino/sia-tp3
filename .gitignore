@@ -170,3 +170,7 @@ Pipfile.lock
 .venv/
 
 .idea/
+
+# results
+/results
+/results/*
