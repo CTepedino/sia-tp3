@@ -1,4 +1,4 @@
-import exer2_raw
+import exer2_main
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,13 +8,13 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         number = sys.argv[1]
         if not number.isdigit() or int(number) <= 0:
-            print("El argumento debe ser un número entero positivo.")
-            sys.exit(1)
-        iterations = int(number)
+            print("El argumento debe ser un número entero positivo. Se usa el default 100")
+        if number.isdigit() and int(number) > 0:
+            iterations = int(number)    
 
     executions = []
     for i in range(iterations):
-        executions.append(exer2_raw.main(False))
+        executions.append(exer2_main.main(False))
 
     # Calcular el promedio de los errores de test
     avg_test_lineal = np.mean([entry['test_error_lineal'] for entry in executions])
@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     # Añadir etiquetas y título
     plt.ylabel('Error Promedio')
-    plt.title('Promedio de Errores de Test')
+    plt.title(f'Promedio de Errores de Test en {iterations} Ejecuciones')
 
     # Mostrar el gráfico
     plt.tight_layout()
