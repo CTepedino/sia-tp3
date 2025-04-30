@@ -9,15 +9,15 @@ class Perceptron:
 
     def predict(self, x):
         x = np.insert(x, 0, 1)
-        return 1 if np.dot(self.w, x) >= 0 else -1
+        return np.dot(self.w, x)
 
     def fit(self, X, y):
         for _ in range(self.epochs):
             errores = 0
             for xi, target in zip(X, y):
                 xi_bias = np.insert(xi, 0, 1)
-                pred = self.predict(xi)
-                if pred != target:
-                    self.w += self.lr * target * xi_bias
-                    errores += 1
-            self.train_errors.append(errores / len(y))
+                pred = np.dot(self.w, xi_bias)
+                error = pred - target
+                self.w -= self.lr * error * xi_bias
+                errores += error**2
+            self.train_errors.append(errores / len(y))  # MSE por época

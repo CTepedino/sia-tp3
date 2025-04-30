@@ -5,7 +5,7 @@ from datetime import datetime
 
 os.makedirs('results', exist_ok=True)
 timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-save_results = "results/result_ex1_or_"+timestamp
+save_results = "results/result_ex1_xor_"+timestamp
 os.makedirs(save_results)
 
 # Entradas originales

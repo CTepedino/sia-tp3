@@ -30,7 +30,7 @@ def cross_validation_lineal(X, y, k=5, lr=0.01, epochs=100):
 
         model = Perceptron(input_dim=X.shape[1], lr=lr, epochs=epochs)
         model.fit(X_train, y_train)
-        # revisar si evaluar devuelve el error o q devuelve
+        # devuelve el porcentaje de errores en el test
         error = evaluar(model, X_test, y_test)
         test_errors.append(error)
 
@@ -52,8 +52,6 @@ def entrenar_lineal(X, y, lr=0.01, epochs=100):
 # - El modelo se entrena solo con el 80% → y se evalúa con el 20% restante, que nunca vio antes.
 # - Se repite varias veces con diferentes divisiones (shuffles) para tener una idea estable del error.
 # - Esto permite estimar cómo se comportaría el modelo con datos nuevos reales.
-
-
 def evaluar_generalizacion_lineal(X, y, repeticiones=10, lr=0.01, epochs=100):
     test_errores = []
     for _ in range(repeticiones):
@@ -64,9 +62,10 @@ def evaluar_generalizacion_lineal(X, y, repeticiones=10, lr=0.01, epochs=100):
     return promedio, desvio
 
 def main(save_file=False):
-    data = np.loadtxt('TP3-ej2-conjunto.csv', delimiter=',', skiprows=1)
+    data = np.loadtxt('TP3-ej2-escalado.csv', delimiter=',', skiprows=1)
     X = data[:, :-1]
-    y = np.where(data[:, -1] > 30, 1, -1)
+    y = data[:, -1]
+
 
     test_avg, test_std = evaluar_generalizacion_lineal(X, y)
     output_data = {

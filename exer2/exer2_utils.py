@@ -19,10 +19,13 @@ def transformacion_no_lineal(X):
         ])
     return np.array(X_nl)
 
+#devuelve el modulo entre el objetivo y la prediccion dividido por el tamaño del conjunto de test
+#para que de entre 0 y 1
 def evaluar(modelo, X, y):
+    max_valor = max(np.abs(X).max(), np.abs(y).max())
     errores = 0
     for xi, target in zip(X, y):
         pred = modelo.predict(xi)
         if pred != target:
-            errores += 1
+            errores += abs(target - pred)/max_valor
     return errores / len(y)
