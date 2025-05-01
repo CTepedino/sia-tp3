@@ -33,11 +33,11 @@ data = np.loadtxt('TP3-ej2-escalado.csv', delimiter=',', skiprows=1)
 X = data[:, :-1]
 y = data[:, -1]
 
-
-lrs = [0.00001, 0.0001,0.001, 0.002, 0.005,0.0075, 0.01, 0.015, 0.02]
+# lrs = [0.0001, 0.0005,0.001,0.005, 0.0075, 0.01, 0.0125]
+lrs = [ 0.005, 0.0075, 0.01, 0.0125,  0.015, 0.0175]
 # Ejecutar
-repeticiones=50
-resultados = probar_diferentes_lr(X, y, lrs, epochs=100, repeticiones=repeticiones)
+repeticiones=500
+resultados = probar_diferentes_lr(X, y, lrs, epochs=500, repeticiones=repeticiones)
 
 # Extraer info
 lrs = [res["lr"] for res in resultados]
@@ -46,7 +46,8 @@ test_error_lineal_std = [res["test_error_lineal_std"] for res in resultados]
 test_error_nolineal_prom = [res["test_error_no_lineal_prom"] for res in resultados]
 test_error_nolineal_std = [res["test_error_no_lineal_std"] for res in resultados]
 
-# Graficar con barras de error
+# ... (todo igual hasta antes de mostrar el gráfico)
+
 plt.figure(figsize=(10, 6))
 plt.errorbar(
     lrs,
@@ -54,7 +55,7 @@ plt.errorbar(
     yerr=test_error_lineal_std,
     fmt='o-',
     label='Lineal',
-    capsize=5 
+    capsize=5
 )
 
 plt.errorbar(
@@ -63,7 +64,30 @@ plt.errorbar(
     yerr=test_error_nolineal_std,
     fmt='s-',
     label='No Lineal',
-    capsize=5 
+    capsize=5
+)
+
+# Encontrar mínimos y marcarlos en rojo
+idx_min_lineal = np.argmin(test_error_lineal_prom)
+idx_min_nolineal = np.argmin(test_error_nolineal_prom)
+
+plt.scatter(
+    lrs[idx_min_lineal],
+    test_error_lineal_prom[idx_min_lineal],
+    color='red',
+    s=100,
+    zorder=5,
+    label='Mínimo Lineal'
+)
+
+plt.scatter(
+    lrs[idx_min_nolineal],
+    test_error_nolineal_prom[idx_min_nolineal],
+    color='red',
+    s=100,
+    zorder=5,
+    marker='D',
+    label='Mínimo No Lineal'
 )
 
 plt.xlabel('Learning Rate (lr)')
@@ -73,7 +97,8 @@ plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+
 timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 root = f'results/'
-os.makedirs(root)
+os.makedirs(root, exist_ok=True)
 plt.savefig(f'results/lr_vs_test_error_{timestamp}.png')
