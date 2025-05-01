@@ -5,9 +5,11 @@ import json
 from datetime import datetime
 import sys
 
-from exer2_perceptron import Perceptron
-from exer2_utils import dividir_train_test, transformacion_no_lineal, evaluar
+from perceptron import Perceptron
+from utils import dividir_train_test, transformacion_no_lineal, evaluar
 
+
+# definimos los lr en base a los resultados de main_lr q prueba con varios lr
 def entrenar_lineal(X, y, lr=0.01, epochs=100):
     X_train, y_train, X_test, y_test = dividir_train_test(X, y)
     model = Perceptron(input_dim=X.shape[1], lr=lr, epochs=epochs)
@@ -16,7 +18,7 @@ def entrenar_lineal(X, y, lr=0.01, epochs=100):
     test_error = evaluar(model, X_test, y_test)
     return model, train_error, test_error
 
-def entrenar_no_lineal(X, y, lr=0.01, epochs=100):
+def entrenar_no_lineal(X, y, lr=0.005, epochs=100):
     X_nl = transformacion_no_lineal(X)
     X_train, y_train, X_test, y_test = dividir_train_test(X_nl, y)
     model = Perceptron(input_dim=X_nl.shape[1], lr=lr, epochs=epochs)

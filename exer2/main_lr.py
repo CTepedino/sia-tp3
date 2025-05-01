@@ -1,4 +1,4 @@
-import exer2_main as main
+import exer2.main as main
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime 
@@ -34,7 +34,7 @@ X = data[:, :-1]
 y = data[:, -1]
 
 # lrs = [0.0001, 0.0005,0.001,0.005, 0.0075, 0.01, 0.0125]
-lrs = [ 0.005, 0.0075, 0.01, 0.0125,  0.015, 0.0175]
+lrs = [0.001, 0.0025, 0.005, 0.0075, 0.01, 0.0125]
 # Ejecutar
 repeticiones=500
 resultados = probar_diferentes_lr(X, y, lrs, epochs=500, repeticiones=repeticiones)

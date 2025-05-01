@@ -30,7 +30,7 @@ def transformacion_no_lineal(X):
 
 def softplus(x):
     x = np.array(x)
-    return np.log1p(np.exp(x))  # log1p para evitar overflow en valores grandes
+    return np.log1p(np.exp(x)) 
 
 # def transformacion_no_lineal(X):
 #     X_nl = []

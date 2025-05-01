@@ -1,4 +1,4 @@
-import exer2_main
+import main as main
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     executions = []
     for i in range(iterations):
-        executions.append(exer2_main.main(False))
+        executions.append(main.main(False))
 
     # Calcular el promedio de los errores de test
     avg_test_lineal = np.mean([entry['test_error_lineal'] for entry in executions])
