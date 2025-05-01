@@ -20,7 +20,7 @@ X = np.array([
 y = np.array([1, -1, -1, 1])
 
 # Peso para bias (w[0]) más peso para "cantidad de diferencias" (w[1])
-w = np.random.uniform(0, 2, 2)
+w = np.random.uniform(-1, 1, 2)
 
 learning_rate = 0.1
 epochs = 10
