@@ -20,4 +20,4 @@ class Perceptron:
                 error = pred - target
                 self.w -= self.lr * error * xi_bias
                 errores += error**2
-            self.train_errors.append(errores / len(y))  # MSE por época
+            self.train_errors.append(errores / len(y))

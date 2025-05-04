@@ -4,7 +4,7 @@ import os
 import json
 from datetime import datetime
 import sys
-
+from matplotlib import cm
 from perceptron import Perceptron
 from utils import dividir_train_test, evaluar, transformacion_no_lineal
 
@@ -55,6 +55,13 @@ def cross_validation_no_lineal(X, y, k=5, lr=0.005, epochs=100):
     desvio = np.std(test_errors)
     return promedio, desvio
 
+def evaluar_generalizacion_cross_val(X, y, repeticiones=50, lr=0.005, epochs=500):
+    errores = []
+    for _ in range(repeticiones):
+        avg, _ = cross_validation_no_lineal(X, y, k=5, lr=lr, epochs=epochs)
+        errores.append(avg)
+    return errores
+
 
 def main(save_file=False):
     data = np.loadtxt('TP3-ej2-escalado.csv', delimiter=',', skiprows=1)
@@ -62,13 +69,15 @@ def main(save_file=False):
     y = data[:, -1]
     lr_no_lineal = 0.005
     epochs = [10,20,50,100,200,500]
+    # epochs = [200,500,1000,2000,3000,5000,10000]
     resultados = []
     # test_avg, test_std = evaluar_generalizacion_no_lineal(X, y, repeticiones=100, lr=lr_no_lineal, epochs=100)
-    for epoch in epochs:
-        print(f"Evaluando epochs: {epoch}")
-        cv_avg, cv_std = cross_validation_no_lineal(X, y, k=5, lr=lr_no_lineal, epochs=epoch)
-        resultados.append((epoch, cv_avg, cv_std))
-
+    # for epoch in epochs:
+    #     print(f"Evaluando epochs: {epoch}")
+    #     cv_avg, cv_std = cross_validation_no_lineal(X, y, k=5, lr=lr_no_lineal, epochs=epoch)
+    #     resultados.append((epoch, cv_avg, cv_std))
+    
+    cv_avg, cv_std = cross_validation_no_lineal(X, y, k=5, lr=lr_no_lineal, epochs=500)
     output_data = {
         # "no_lineal_generalization_avg": round(test_avg, 6),
         # "no_lineal_generalization_std": round(test_std, 6),
@@ -76,19 +85,41 @@ def main(save_file=False):
         "no_lineal_cv_std": round(cv_std, 6)
     }
 
-    epocas = [r[0] for r in resultados]
-    promedios = [r[1] for r in resultados]
-    desvios = [r[2] for r in resultados]
+    # epocas = [r[0] for r in resultados]
+    # promedios = [r[1] for r in resultados]
+    # desvios = [r[2] for r in resultados]
 
-    # Graficar con barras de error
-    plt.figure(figsize=(8, 5))
-    plt.errorbar(epocas, promedios, yerr=desvios, fmt='o-', ecolor='red', capsize=5, markersize=6)
-    plt.title('Error de Validación Cruzada (No Lineal)')
-    plt.xlabel('Épocas')
-    plt.ylabel('Error promedio')
+
+
+
+    errores_generales = evaluar_generalizacion_cross_val(X, y, repeticiones=100, lr=lr_no_lineal, epochs=500)
+        
+    plt.figure(figsize=(12,5))
+
+        # Boxplot
+    plt.subplot(1, 2, 1)
+    plt.boxplot(errores_generales, vert=True, patch_artist=True)
+    plt.title('Distribución del Error de Validación Cruzada (500 épocas)')
+    plt.ylabel('Error')
     plt.grid(True)
+
+        # Histograma
+    plt.subplot(1, 2, 2)
+    counts, bins, patches = plt.hist(errores_generales, bins=15, edgecolor='black')
+
+    norm = plt.Normalize(bins.min(), bins.max())
+    cmap = cm.plasma
+
+    for count, bin_left, patch in zip(counts, bins, patches):
+        bin_center = bin_left + (bins[1] - bins[0]) / 2
+        color = cmap(norm(bin_center))
+        patch.set_facecolor(color)
+    plt.title('Histograma de Errores (500 épocas)')
+    plt.xlabel('Error')
+    plt.ylabel('Frecuencia')
     plt.tight_layout()
     plt.show()
+
 
     if save_file:
         timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
