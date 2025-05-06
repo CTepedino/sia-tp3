@@ -1,5 +1,7 @@
 import copy
 import random
+import os
+from datetime import datetime
 
 class SingleLayerPerceptron:
     def __init__(self, input_size, learning_rate, activator_function, error_function, weight_update_factor = lambda x: 1):
@@ -24,10 +26,10 @@ class SingleLayerPerceptron:
                 self.weights = [w + self.learning_rate * (y-output) * self.weight_update_factor(h) * x_i for w, x_i in zip(self.weights, x)]
                 error += self.error_function(y, output)
 
-                print(f"input: {x[:-1]}, out: {output}, expected: {y}")
+                # print(f"input: {x[:-1]}, out: {output}, expected: {y}")
 
             average_error = error/len(training_set)
-            print(f"epoch {epoch + 1} average error - {average_error}")
+            # print(f"epoch {epoch + 1} average error - {average_error}")
             if self.error_min is None or average_error < self.error_min:
                 self.error_min = average_error
                 self.best_weights = self.weights
@@ -72,6 +74,12 @@ class MultiLayerPerceptron:
     def __init__(self, layers, learning_rate, activator_function, error_function, weight_update_factor = lambda x: 1):
         self.layers = layers
         self.learning_rate = learning_rate
+        timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        results_directory = "results/results_ex3_mlp_" + timestamp
+        os.makedirs(results_directory, exist_ok=True)
+        self.results_directory = results_directory 
+        self.results_file = os.path.join(results_directory, "results.txt")
+
 
         self.activator_function = activator_function
         self.error_function = error_function
@@ -151,7 +159,11 @@ class MultiLayerPerceptron:
                 error += self.backPropagation(y, hs, activations)
 
             average_error = error/len(training_set)
-            print(f"epoch {epoch + 1} average error - {average_error}")
+            # Escribir en archivo
+            with open(self.results_file, "a") as f:
+                log_line = f"epoch {epoch + 1} average error - {average_error}\n"
+                f.write(log_line)
+
             if self.error_min is None or average_error < self.error_min:
                 self.error_min = average_error
                 self.best_weights = copy.deepcopy(self.weights)

@@ -1,4 +1,4 @@
-from ref.Perceptron import MultiLayerPerceptron
+from Perceptron import MultiLayerPerceptron
 
 
 import math
@@ -39,6 +39,6 @@ mlp = MultiLayerPerceptron(
 mlp.train(xor_inputs, xor_outputs, 10000)
 
 print("\n--- XOR Results ---")
-for x in xor_inputs:
-    out = mlp.test(x)
-    print(f"Input: {x} -> Output: {out}")
+for i in range(len(xor_inputs)):
+    out = mlp.test(xor_inputs[i])
+    print(f"Input: {xor_inputs[i]} -> Output: {out}, Clasified as: {1 if out[0] >= 0.5 else 0}, Expected: {xor_outputs[i][0]}")
