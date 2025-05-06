@@ -1,4 +1,4 @@
-from Perceptron import MultiLayerPerceptron
+from perceptron import MultiLayerPerceptron
 
 
 import math

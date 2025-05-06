@@ -1,5 +1,12 @@
 import math
 
+def step(x):
+    return 1 if x >= 0 else -1
+
+def identity(x):
+    return x
+
+
 def hiperbolic_tangent(x):
     return math.tanh(x)
 

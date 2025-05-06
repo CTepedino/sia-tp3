@@ -1,6 +1,15 @@
 import copy
 import random
 
+from activatorFunctions import step, identity
+
+
+def binary_error(y, output):
+    return 0 if y == output else 1
+
+def mse_error(y, output):
+    return 0.5 * ((y-output)**2)
+
 class SingleLayerPerceptron:
     def __init__(self, input_size, learning_rate, activator_function, error_function, activator_derivative = lambda x: 1):
         self.weights = [random.uniform(-1, 1) for _ in range(input_size + 1)]
@@ -39,25 +48,9 @@ class SingleLayerPerceptron:
         x_with_bias = x + [1]
         return self.activator_function(sum(w * x_i for w, x_i in zip(self.weights, x_with_bias)))
 
-
-def step(x):
-    return 1 if x >= 0 else -1
-
-def binary_error(y, output):
-    return 0 if y == output else 1
-
-def mse_error(y, output):
-    return 0.5 * ((y-output)**2)
-
 class SingleLayerStepPerceptron(SingleLayerPerceptron):
     def __init__(self, input_size, learning_rate):
         super().__init__(input_size, learning_rate, step, binary_error)
-
-def identity(x):
-    return x
-
-def identity_error_function(y, output):
-    return 0.5 * ((y - output) ** 2)
 
 class SingleLayerLinearPerceptron(SingleLayerPerceptron):
     def __init__(self, input_size, learning_rate):
@@ -66,8 +59,6 @@ class SingleLayerLinearPerceptron(SingleLayerPerceptron):
 
 class SingleLayerNonLinearPerceptron(SingleLayerPerceptron):
     def __init__(self, input_size, learning_rate, non_linear_function, non_linear_derivative):
-        def non_linear_error(y, output):
-            return 0.5 * ((y - output) ** 2)
         super().__init__(input_size, learning_rate, non_linear_function, mse_error, non_linear_derivative)
 
 
@@ -95,7 +86,7 @@ class MultiLayerPerceptron:
         self.best_weights = None
         self.best_biases = None
 
-    def forwardPropagation(self, input_data):
+    def forward_propagation(self, input_data):
         activations = [input_data]
         hs = []
 
@@ -118,7 +109,7 @@ class MultiLayerPerceptron:
 
         return hs, activations
 
-    def backPropagation(self, expected_output, hs, activations):
+    def back_propagation(self, expected_output, hs, activations):
         deltas = [[] for _ in range(len(self.weights))]
 
         last_layer = len(self.weights) - 1
@@ -149,9 +140,9 @@ class MultiLayerPerceptron:
             error = 0
 
             for x, y in zip(training_set, expected_outputs):
-                hs, activations = self.forwardPropagation(x)
+                hs, activations = self.forward_propagation(x)
                 output = activations[-1]
-                self.backPropagation(y, hs, activations)
+                self.back_propagation(y, hs, activations)
 
                 error += 0.5 * sum((yt - yp) ** 2 for yt, yp in zip(y, output)) / len(y)
 
@@ -166,7 +157,7 @@ class MultiLayerPerceptron:
         self.biases = copy.deepcopy(self.best_biases)
 
     def test(self, input_data):
-        hs, activations = self.forwardPropagation(input_data)
+        hs, activations = self.forward_propagation(input_data)
         return activations[-1]
 
 perceptrons = {
