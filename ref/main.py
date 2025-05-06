@@ -1,6 +1,7 @@
 import json
 import sys
 
+from ref.NonLinearFunctions import non_linear_functions
 from ref.Perceptron import perceptrons
 
 if __name__ == "__main__":
@@ -11,9 +12,18 @@ if __name__ == "__main__":
     training_inputs = config["training_inputs"]
     training_outputs = config["training_outputs"]
 
+    if config["perceptron"] == "non_linear":
+        functions = non_linear_functions[config["non_linear_function"]]
+        perceptron = perceptrons[config["perceptron"]](
+            len(training_inputs[0]),
+            config["learning_rate"],
+            functions[0],
+            functions[1]
+        )
+    else:
+        perceptron = perceptrons[config["perceptron"]](len(training_inputs[0]), config["learning_rate"])
 
 
-    perceptron = perceptrons[config["perceptron"]](len(training_inputs[0]), config["learning_rate"])
     perceptron.train(training_inputs, training_outputs, config["epochs"])
 
     test_inputs = []

@@ -67,8 +67,6 @@ class SingleLayerNonLinearPerceptron(SingleLayerPerceptron):
     def __init__(self, input_size, learning_rate, non_linear_function, non_linear_derivative):
         def non_linear_error(y, output):
             return 0.5 * ((y - output) ** 2)
-
-
         super().__init__(input_size, learning_rate, non_linear_function, non_linear_error, non_linear_derivative)
 
 perceptrons = {
