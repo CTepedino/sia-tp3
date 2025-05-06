@@ -1,10 +1,17 @@
 import math
 
-def hiperbolic_tangent(x):
+def step(x):
+    return 1 if x >= 0 else -1
+
+def identity(x):
+    return x
+
+
+def hyperbolic_tangent(x):
     return math.tanh(x)
 
-def hiperbolic_tangent_derivative(x):
-    return 1 - hiperbolic_tangent(x)**2
+def hyperbolic_tangent_derivative(x):
+    return 1 - hyperbolic_tangent(x)**2
 
 
 def sigmoid(x):
@@ -40,7 +47,7 @@ def mish_derivative(x):
 
 non_linear_functions = {
     "sigmoid": (sigmoid, sigmoid_derivative),
-    "tanh": (hiperbolic_tangent, hiperbolic_tangent_derivative),
+    "tanh": (hyperbolic_tangent, hyperbolic_tangent_derivative),
     "relu": (relu, relu_derivative),
     "softplus": (softplus, softplus_derivative),
     "mish": (mish, mish_derivative)
