@@ -1,8 +1,8 @@
 import os
 import numpy as np
 from PIL import Image
-from Perceptron import MultiLayerPerceptron
-from NonLinearFunctions import non_linear_functions
+from perceptron import MultiLayerPerceptron
+from activatorFunctions import non_linear_functions
 
 # Cargar imágenes y labels
 def load_images_from_folder(folder_path, image_size=(300, 300)):

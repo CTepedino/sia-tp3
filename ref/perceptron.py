@@ -35,11 +35,7 @@ class SingleLayerPerceptron:
                 self.weights = [w + self.learning_rate * (y-output) * self.activator_derivative(h) * x_i for w, x_i in zip(self.weights, x_with_bias)]
                 error += self.error_function(y, output)
 
-<<<<<<< HEAD:ref/Perceptron.py
                 # print(f"input: {x[:-1]}, out: {output}, expected: {y}")
-=======
-                print(f"input: {x}, out: {output}, expected: {y}")
->>>>>>> dc58efa6005c13d085979cd0c787935983337a20:ref/perceptron.py
 
             average_error = error/len(training_set)
             # print(f"epoch {epoch + 1} average error - {average_error}")

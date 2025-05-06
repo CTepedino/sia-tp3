@@ -1,5 +1,5 @@
-from Perceptron import MultiLayerPerceptron
-from NonLinearFunctions import non_linear_functions
+from perceptron import MultiLayerPerceptron
+from activatorFunctions import non_linear_functions
 
 def load_digit_data(file_path):
     with open(file_path, 'r') as f:
