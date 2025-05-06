@@ -2,13 +2,13 @@ import copy
 import random
 
 class SingleLayerPerceptron:
-    def __init__(self, input_size, learning_rate, activator_function, error_function, weight_update_factor = lambda x: 1):
+    def __init__(self, input_size, learning_rate, activator_function, error_function, activator_derivative = lambda x: 1):
         self.weights = [random.uniform(-1, 1) for _ in range(input_size + 1)]
         self.learning_rate = learning_rate
 
         self.activator_function = activator_function
         self.error_function = error_function
-        self.weight_update_factor = weight_update_factor
+        self.activator_derivative = activator_derivative
 
         self.error_min = None
         self.best_weights = None
@@ -17,14 +17,14 @@ class SingleLayerPerceptron:
         for epoch in range(epochs):
             error = 0
             for x, y in zip(training_set, expected_outputs):
-                x.append(1)
-                h = sum(w * x_i for w, x_i in zip(self.weights, x))
+                x_with_bias = x + [1]
+                h = sum(w * x_i for w, x_i in zip(self.weights, x_with_bias))
 
                 output = self.activator_function(h)
-                self.weights = [w + self.learning_rate * (y-output) * self.weight_update_factor(h) * x_i for w, x_i in zip(self.weights, x)]
+                self.weights = [w + self.learning_rate * (y-output) * self.activator_derivative(h) * x_i for w, x_i in zip(self.weights, x_with_bias)]
                 error += self.error_function(y, output)
 
-                print(f"input: {x[:-1]}, out: {output}, expected: {y}")
+                print(f"input: {x}, out: {output}, expected: {y}")
 
             average_error = error/len(training_set)
             print(f"epoch {epoch + 1} average error - {average_error}")
@@ -36,19 +36,22 @@ class SingleLayerPerceptron:
 
 
     def test(self, x):
-        x.append(1)
-        return self.activator_function(sum(w * x_i for w, x_i in zip(self.weights, x)))
+        x_with_bias = x + [1]
+        return self.activator_function(sum(w * x_i for w, x_i in zip(self.weights, x_with_bias)))
 
 
 def step(x):
     return 1 if x >= 0 else -1
 
-def step_error_function(y, output):
-    return 0.5 * abs(y - output)
+def binary_error(y, output):
+    return 0 if y == output else 1
+
+def mse_error(y, output):
+    return 0.5 * ((y-output)**2)
 
 class SingleLayerStepPerceptron(SingleLayerPerceptron):
     def __init__(self, input_size, learning_rate):
-        super().__init__(input_size, learning_rate, step, step_error_function)
+        super().__init__(input_size, learning_rate, step, binary_error)
 
 def identity(x):
     return x
@@ -58,24 +61,25 @@ def identity_error_function(y, output):
 
 class SingleLayerLinearPerceptron(SingleLayerPerceptron):
     def __init__(self, input_size, learning_rate):
-        super().__init__(input_size, learning_rate, identity, identity_error_function)
+        super().__init__(input_size, learning_rate, identity, mse_error)
 
 
 class SingleLayerNonLinearPerceptron(SingleLayerPerceptron):
     def __init__(self, input_size, learning_rate, non_linear_function, non_linear_derivative):
         def non_linear_error(y, output):
             return 0.5 * ((y - output) ** 2)
-        super().__init__(input_size, learning_rate, non_linear_function, non_linear_error, non_linear_derivative)
+        super().__init__(input_size, learning_rate, non_linear_function, mse_error, non_linear_derivative)
 
 
 class MultiLayerPerceptron:
-    def __init__(self, layers, learning_rate, activator_function, error_function, weight_update_factor = lambda x: 1):
+    def __init__(self, layers, learning_rate, activator_function, activator_derivative = lambda x: 1):
+
+
         self.layers = layers
         self.learning_rate = learning_rate
 
         self.activator_function = activator_function
-        self.error_function = error_function
-        self.weight_update_factor = weight_update_factor
+        self.activator_derivative = activator_derivative
 
         self.weights = [
             [[random.uniform(-1, 1) for _ in range(layers[i])] for _ in range(layers[i + 1])]
@@ -119,7 +123,7 @@ class MultiLayerPerceptron:
 
         last_layer = len(self.weights) - 1
         deltas[last_layer] = [
-            (output - target) * self.weight_update_factor(z)
+            (output - target) * self.activator_derivative(z)
             for output, target, z in zip(activations[-1], expected_output, hs[-1])
         ]
 
@@ -130,7 +134,7 @@ class MultiLayerPerceptron:
                     deltas[l + 1][k] * self.weights[l + 1][k][i]
                     for k in range(len(self.weights[l + 1]))
                 )
-                delta = downstream_sum * self.weight_update_factor(hs[l][i])
+                delta = downstream_sum * self.activator_derivative(hs[l][i])
                 deltas[l].append(delta)
 
         for l in range(len(self.weights)):
@@ -140,15 +144,16 @@ class MultiLayerPerceptron:
                     self.weights[l][i][j] -= self.learning_rate * gradient
                 self.biases[l][i] -= self.learning_rate * deltas[l][i]
 
-        return self.error_function(expected_output, activations[-1])
-
     def train(self, training_set, expected_outputs, epochs):
         for epoch in range(epochs):
             error = 0
 
             for x, y in zip(training_set, expected_outputs):
                 hs, activations = self.forwardPropagation(x)
-                error += self.backPropagation(y, hs, activations)
+                output = activations[-1]
+                self.backPropagation(y, hs, activations)
+
+                error += 0.5 * sum((yt - yp) ** 2 for yt, yp in zip(y, output)) / len(y)
 
             average_error = error/len(training_set)
             print(f"epoch {epoch + 1} average error - {average_error}")
