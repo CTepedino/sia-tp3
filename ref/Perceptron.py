@@ -68,7 +68,6 @@ class SingleLayerNonLinearPerceptron(SingleLayerPerceptron):
         super().__init__(input_size, learning_rate, non_linear_function, non_linear_error, non_linear_derivative)
 
 
-
 class MultiLayerPerceptron:
     def __init__(self, layers, learning_rate, activator_function, error_function, weight_update_factor = lambda x: 1):
         self.layers = layers
@@ -92,8 +91,7 @@ class MultiLayerPerceptron:
         self.best_weights = None
         self.best_biases = None
 
-    def propagation(self, input_data, expected_output):
-        #Forward pass
+    def forwardPropagation(self, input_data):
         activations = [input_data]
         hs = []
 
@@ -114,7 +112,9 @@ class MultiLayerPerceptron:
             hs.append(layer_h)
             activations.append(layer_activation)
 
-        #Backpropagation
+        return hs, activations
+
+    def backPropagation(self, expected_output, hs, activations):
         deltas = [[] for _ in range(len(self.weights))]
 
         last_layer = len(self.weights) - 1
@@ -142,13 +142,13 @@ class MultiLayerPerceptron:
 
         return self.error_function(expected_output, activations[-1])
 
-
     def train(self, training_set, expected_outputs, epochs):
         for epoch in range(epochs):
             error = 0
 
             for x, y in zip(training_set, expected_outputs):
-                error += self.propagation(x, y)
+                hs, activations = self.forwardPropagation(x)
+                error += self.backPropagation(y, hs, activations)
 
             average_error = error/len(training_set)
             print(f"epoch {epoch + 1} average error - {average_error}")
@@ -161,24 +161,7 @@ class MultiLayerPerceptron:
         self.biases = copy.deepcopy(self.best_biases)
 
     def test(self, input_data):
-        activations = [input_data]
-
-        for layer_index in range(len(self.weights)):
-            prev_activation = activations[-1]
-            layer_weights = self.weights[layer_index]
-            layer_biases = self.biases[layer_index]
-
-            layer_h = []
-            layer_activation = []
-
-            for neuron_weights, bias in zip(layer_weights, layer_biases):
-                h = sum(w * x for w, x in zip(neuron_weights, prev_activation)) + bias
-                a = self.activator_function(h)
-                layer_h.append(h)
-                layer_activation.append(a)
-
-            activations.append(layer_activation)
-
+        hs, activations = self.forwardPropagation(input_data)
         return activations[-1]
 
 perceptrons = {
