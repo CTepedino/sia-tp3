@@ -1,0 +1,20 @@
+{
+  "perceptron": "step",
+  "learning_rate": 0.1,
+  "epochs": 10000,
+  "training_inputs": [
+    [-1, 1],
+    [1, -1],
+    [-1, -1],
+    [1, 1]
+  ],
+  "training_outputs": [1, 1, -1, -1],
+
+  "test_inputs": [
+    [-1, 1],
+    [1, -1],
+    [-1, -1],
+    [1, 1]
+  ],
+  "test_outputs": [1, 1, -1, -1]
+}
