@@ -1,9 +1,9 @@
 import copy
-
+import random
 
 class SingleLayerPerceptron:
     def __init__(self, input_size, learning_rate, activator_function, error_function, weight_update_factor = lambda x: 1):
-        self.weights = [0.0 for _ in range(input_size + 1)]
+        self.weights = [random.uniform(-1, 1) for _ in range(input_size + 1)]
         self.learning_rate = learning_rate
 
         self.activator_function = activator_function
@@ -79,12 +79,12 @@ class MultiLayerPerceptron:
         self.weight_update_factor = weight_update_factor
 
         self.weights = [
-            [[0.0 for _ in range(layers[i])] for _ in range(layers[i + 1])]
+            [[random.uniform(-1, 1) for _ in range(layers[i])] for _ in range(layers[i + 1])]
             for i in range(len(layers) - 1)
         ]
 
         self.biases = [
-            [0.0 for _ in range(layers[i + 1])]
+            [random.uniform(-1, 1) for _ in range(layers[i + 1])]
             for i in range(len(layers) - 1)
         ]
 
@@ -184,60 +184,7 @@ class MultiLayerPerceptron:
 perceptrons = {
     "step": SingleLayerStepPerceptron,
     "linear": SingleLayerLinearPerceptron,
-    "non_linear": SingleLayerNonLinearPerceptron
+    "non_linear": SingleLayerNonLinearPerceptron,
+    "multilayer": MultiLayerPerceptron
 }
-
-
-
-
-import math
-
-def sigmoid(x):
-    return 1 / (1 + math.exp(-x))
-
-def sigmoid_derivative(x):
-    s = sigmoid(x)
-    return s * (1 - s)
-
-def mean_squared_error(y_true, y_pred):
-    return sum((yt - yp) ** 2 for yt, yp in zip(y_true, y_pred)) / len(y_true)
-
-
-xor_inputs = [
-    [0, 0],
-    [0, 1],
-    [1, 0],
-    [1, 1]
-]
-
-xor_outputs = [
-    [0],
-    [1],
-    [1],
-    [0]
-]
-
-mlp = MultiLayerPerceptron(
-    layers=[2, 2, 1],
-    learning_rate=0.5,
-    activator_function=sigmoid,
-    error_function=mean_squared_error,
-    weight_update_factor=sigmoid_derivative
-)
-
-import random
-for l in range(len(mlp.weights)):
-    for i in range(len(mlp.weights[l])):
-        for j in range(len(mlp.weights[l][i])):
-            mlp.weights[l][i][j] = random.uniform(-1, 1)
-    for i in range(len(mlp.biases[l])):
-        mlp.biases[l][i] = random.uniform(-1, 1)
-
-mlp.train(xor_inputs, xor_outputs, 10000)
-
-print("\n--- XOR Results ---")
-for x in xor_inputs:
-    out = mlp.test(x)
-    print(f"Input: {x} -> Output: {out}")
-
 
