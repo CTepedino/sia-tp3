@@ -64,8 +64,6 @@ class SingleLayerNonLinearPerceptron(SingleLayerPerceptron):
 
 class MultiLayerPerceptron:
     def __init__(self, layers, learning_rate, activator_function, activator_derivative = lambda x: 1):
-
-
         self.layers = layers
         self.learning_rate = learning_rate
 
