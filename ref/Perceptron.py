@@ -1,8 +1,7 @@
 class SingleLayerPerceptron:
     def __init__(self, input_size, learning_rate, activator_function, error_function, weight_update_factor = lambda x: 1):
-        self.weights = [0.0 for _ in range(input_size)]
+        self.weights = [0.0 for _ in range(input_size + 1)]
         self.learning_rate = learning_rate
-        self.bias = 0
 
         self.activator_function = activator_function
         self.error_function = error_function
@@ -10,36 +9,32 @@ class SingleLayerPerceptron:
 
         self.error_min = None
         self.best_weights = None
-        self.best_bias = None
 
     def train(self, training_set, expected_outputs, epochs):
         for epoch in range(epochs):
             error = 0
             for x, y in zip(training_set, expected_outputs):
-                h = sum(w * x_i for w, x_i in zip(self.weights, x)) + self.bias
+                x.append(1)
+                h = sum(w * x_i for w, x_i in zip(self.weights, x))
 
                 output = self.activator_function(h)
-
                 self.weights = [w + self.learning_rate * (y-output) * self.weight_update_factor(h) * x_i for w, x_i in zip(self.weights, x)]
-                self.bias += self.learning_rate * (y-output) * self.weight_update_factor(h)
                 error += self.error_function(y, output)
 
-                print(f"input: {x}, out: {output}, expected: {y}")
+                print(f"input: {x[:-1]}, out: {output}, expected: {y}")
 
             average_error = error/len(training_set)
             print(f"epoch {epoch + 1} average error - {average_error}")
             if self.error_min is None or average_error < self.error_min:
                 self.error_min = average_error
                 self.best_weights = self.weights
-                self.best_bias = self.bias
 
         self.weights = self.best_weights
-        self.bias = self.best_bias
-
 
 
     def test(self, x):
-        return self.activator_function(sum(w * x_i for w, x_i in zip(self.weights, x)) + self.bias)
+        x.append(1)
+        return self.activator_function(sum(w * x_i for w, x_i in zip(self.weights, x)))
 
 
 def step(x):
@@ -68,6 +63,58 @@ class SingleLayerNonLinearPerceptron(SingleLayerPerceptron):
         def non_linear_error(y, output):
             return 0.5 * ((y - output) ** 2)
         super().__init__(input_size, learning_rate, non_linear_function, non_linear_error, non_linear_derivative)
+
+
+
+class MultiLayerPerceptron:
+    def __init__(self, layers, learning_rate, activator_function, error_function, weight_update_factor = lambda x: 1):
+        self.layers = layers
+        self.learning_rate = learning_rate
+
+        self.activator_function = activator_function
+        self.error_function = error_function
+        self.weight_update_factor = weight_update_factor
+
+        self.weights = [
+            [[0.0 for _ in range(layers[i])] for _ in range(layers[i + 1])]
+            for i in range(len(layers) - 1)
+        ]
+
+        self.biases = [
+            [0.0 for _ in range(layers[i + 1])]
+            for i in range(len(layers) - 1)
+        ]
+
+        self.error_min = None
+        self.best_weights = None
+        self.best_biases = None
+
+    def forwardPropagation(self, training_set):
+        activations = [training_set]
+
+        for layer_index in range(len(self.weights)):
+            prev_activation = activations[-1]
+            layer_weights = self.weights[layer_index]
+            layer_biases = self.biases[layer_index]
+            layer_output = []
+
+            for neuron_weights, bias in zip(layer_weights, layer_biases):
+                h = sum(w * x_i for w, x_i in zip(neuron_weights, prev_activation)) + bias
+                layer_output.append(self.activator_function(h))
+
+        return activations[-1]
+
+
+    def train(self, training_set, expected_outputs, epochs):
+        for epoch in range(epochs):
+            error = 0
+
+            self.forwardPropagation(training_set)
+
+
+
+        self.weights = self.best_weights
+
 
 perceptrons = {
     "step": SingleLayerStepPerceptron,
