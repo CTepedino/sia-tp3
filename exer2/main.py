@@ -51,15 +51,25 @@ def main(save_file=False):
         with open(f'{root}/output_ex2.json', 'w') as f:
             json.dump(output_data, f, indent=4)
 
-        plt.figure(figsize=(10, 6))
-        plt.plot(model_lineal.train_errors, label='Lineal')
-        plt.plot(model_nolineal.train_errors, label='No Lineal')
-        plt.xlabel('Época')
-        plt.ylabel('Error de entrenamiento')
-        plt.title('Curvas de aprendizaje')
-        plt.legend()
-        plt.grid(True)
-        plt.savefig(f'{root}/learning_curves.png')
+        labels = ['Lineal', 'No Lineal']
+    train_errors = [output_data['train_error_lineal'], output_data['train_error_no_lineal']]
+    test_errors = [output_data['test_error_lineal'], output_data['test_error_no_lineal']]
+
+    x = np.arange(len(labels))  # posiciones de las barras
+    width = 0.35  # ancho de las barras
+
+    plt.figure(figsize=(8, 6))
+    plt.bar(x - width/2, train_errors, width, label='Train Error')
+    plt.bar(x + width/2, test_errors, width, label='Test Error')
+
+    plt.ylabel('Error')
+    plt.title('Errores de entrenamiento y test')
+    plt.xticks(x, labels)
+    plt.legend()
+    plt.grid(axis='y')
+
+    plt.tight_layout()
+    plt.savefig(f'{root}/learning_curves.png')
 
     return output_data
 

@@ -33,20 +33,15 @@ data = np.loadtxt('TP3-ej2-escalado.csv', delimiter=',', skiprows=1)
 X = data[:, :-1]
 y = data[:, -1]
 
-# lrs = [0.0001, 0.0005,0.001,0.005, 0.0075, 0.01, 0.0125]
 lrs = [0.001, 0.0025, 0.005, 0.0075, 0.01, 0.0125]
-# Ejecutar
 repeticiones=500
 resultados = probar_diferentes_lr(X, y, lrs, epochs=500, repeticiones=repeticiones)
 
-# Extraer info
 lrs = [res["lr"] for res in resultados]
 test_error_lineal_prom = [res["test_error_lineal_prom"] for res in resultados]
 test_error_lineal_std = [res["test_error_lineal_std"] for res in resultados]
 test_error_nolineal_prom = [res["test_error_no_lineal_prom"] for res in resultados]
 test_error_nolineal_std = [res["test_error_no_lineal_std"] for res in resultados]
-
-# ... (todo igual hasta antes de mostrar el gráfico)
 
 plt.figure(figsize=(10, 6))
 plt.errorbar(
