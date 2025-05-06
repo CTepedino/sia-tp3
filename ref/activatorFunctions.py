@@ -43,6 +43,12 @@ def mish_derivative(x):
     d = 1+(math.exp(x)+1)**2
     return (math.exp(x)*w)/(d**2)
 
+def leaky_relu(x, alpha=0.05):
+    return x if x > 0 else alpha * x
+
+def leaky_relu_derivative(x, alpha=0.05):
+    return 1 if x > 0 else alpha
+
 
 
 non_linear_functions = {
@@ -50,7 +56,8 @@ non_linear_functions = {
     "tanh": (hyperbolic_tangent, hyperbolic_tangent_derivative),
     "relu": (relu, relu_derivative),
     "softplus": (softplus, softplus_derivative),
-    "mish": (mish, mish_derivative)
+    "mish": (mish, mish_derivative),
+    "leaky_relu": (leaky_relu, leaky_relu_derivative)
 }
 
 

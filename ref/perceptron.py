@@ -157,6 +157,8 @@ class MultiLayerPerceptron:
             with open(self.results_file, "a") as f:
                 log_line = f"epoch {epoch + 1} average error - {average_error}\n"
                 f.write(log_line)
+                if(epoch + 1) % 100 == 0:
+                    print(log_line.strip())
 
             if self.error_min is None or average_error < self.error_min:
                 self.error_min = average_error

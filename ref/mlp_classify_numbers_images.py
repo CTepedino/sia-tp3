@@ -5,7 +5,17 @@ from perceptron import MultiLayerPerceptron
 from activatorFunctions import non_linear_functions
 
 # Cargar imágenes y labels
-def load_images_from_folder(folder_path, image_size=(300, 300)):
+def load_image_as_array(path_imagen, image_size=(28, 28)):
+    with Image.open(path_imagen) as img:
+        img = img.convert("L")  # escala de grises
+        img = img.resize(image_size)  # asegurate que todos tengan la misma forma
+        pixeles = list(img.getdata())
+        normalizado = [p / 255.0 for p in pixeles]
+        return normalizado
+
+
+
+def load_images_from_folder(folder_path, image_size=(28, 28)):
     samples = []
     labels = []
 
@@ -17,29 +27,8 @@ def load_images_from_folder(folder_path, image_size=(300, 300)):
 
             # Abrir imagen, pasar a escala de grises y redimensionar
             img_path = os.path.join(folder_path, file_name)
-            img = Image.open(img_path).convert("L").resize(image_size)
-
-            # Convertir imagen a array normalizado (0.0 - 1.0)
-            img_array = np.array(img) / 255.0
-
-            # Analizar si el fondo es blanco o negro
-            # Se calcula el valor promedio de los píxeles
-            background_value = np.mean(img_array)
-            background_label = 1 if background_value > 0.5 else 0  # Fondo blanco es 0, negro es 1
-
-            # Mostrar el valor de fondo para diagnóstico
-            print(f"Background value: {background_value}, Assigned label: {background_label}")
-
-            # Ahora aseguramos que la imagen se mantenga en 300x300 y no todo sea 1
-            # Convertir la imagen a un array de 300x300 manteniendo el fondo 0 o 1
-            img_array = np.where(img_array > 0.5, 1, 0)  # Asignamos 1 si es blanco (mayor que 0.5), 0 si es negro
-            print(img_array)
-            # Aplanar la imagen y agregarla a la lista de muestras
-            flat_input = img_array.flatten().tolist()
-            samples.append(flat_input)
-            
-            # Guardamos la etiqueta del fondo (0 o 1)
-            labels.append(background_label)
+            img = load_image_as_array(img_path)
+            samples.append(img)
 
     return samples, labels
 
@@ -53,17 +42,16 @@ def labels_to_one_hot(labels, num_classes=10):
     return one_hot
 
 # Configurar MLP
-activ_fn, activ_fn_deriv = non_linear_functions["sigmoid"]
+activ_fn, activ_fn_deriv = non_linear_functions["leaky_relu"]
 mlp = MultiLayerPerceptron(
-    layers=[100, 10],
-    learning_rate=0.01,
-    activator_function=activ_fn,
-    error_function=lambda expected, output: sum((e - o) ** 2 for e, o in zip(expected, output)),
-    weight_update_factor=activ_fn_deriv
+    [128, 64, 10],  
+    0.01, 
+    activ_fn,
+    activ_fn_deriv
 )
 
 # Cargar datos
-train_x, train_labels = load_images_from_folder("./exer3/numeros1")
+train_x, train_labels = load_images_from_folder("./exer3/numeros")
 train_y = labels_to_one_hot(train_labels)
 
 # Entrenar

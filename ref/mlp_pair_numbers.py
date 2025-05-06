@@ -25,11 +25,10 @@ activ_fn, activ_fn_deriv = non_linear_functions["tanh"]
 
 # Instanciar y entrenar el MLP
 mlp = MultiLayerPerceptron(
-    layers=[20, 1],
-    learning_rate=0.1,
-    activator_function=activ_fn,
-    error_function=lambda expected, output: sum((e - o) ** 2 for e, o in zip(expected, output)),
-    weight_update_factor=activ_fn_deriv
+    [20, 1],
+    0.1,
+    activ_fn,
+    activ_fn_deriv
 )
 
 mlp.train(train_x, train_y, epochs=1000)
