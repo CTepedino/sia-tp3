@@ -2,6 +2,7 @@ import copy
 import random
 import os
 from datetime import datetime
+import numpy as np
 
 from activatorFunctions import step, identity
 
@@ -74,103 +75,120 @@ class MultiLayerPerceptron:
         self.results_directory = results_directory 
         self.results_file = os.path.join(results_directory, "results.txt")
 
-
         self.activator_function = activator_function
         self.activator_derivative = activator_derivative
 
-        self.weights = [
-            [[random.uniform(-1, 1) for _ in range(layers[i])] for _ in range(layers[i + 1])]
-            for i in range(len(layers) - 1)
-        ]
-
-        self.biases = [
-            [random.uniform(-1, 1) for _ in range(layers[i + 1])]
-            for i in range(len(layers) - 1)
-        ]
+        # Inicialización de Xavier/Glorot para los pesos
+        self.weights = []
+        self.biases = []
+        
+        for i in range(len(layers) - 1):
+            # Xavier/Glorot initialization
+            scale = np.sqrt(2.0 / (layers[i] + layers[i + 1]))
+            layer_weights = np.random.normal(0, scale, (layers[i + 1], layers[i]))
+            layer_biases = np.random.normal(0, scale, layers[i + 1])
+            
+            self.weights.append(layer_weights.tolist())
+            self.biases.append(layer_biases.tolist())
 
         self.error_min = None
         self.best_weights = None
         self.best_biases = None
+        self.patience = 10  # Para early stopping
+        self.patience_counter = 0
 
     def forward_propagation(self, input_data):
-        activations = [input_data]
+        activations = [np.array(input_data)]
         hs = []
 
         for layer_index in range(len(self.weights)):
             prev_activation = activations[-1]
-            layer_weights = self.weights[layer_index]
-            layer_biases = self.biases[layer_index]
+            layer_weights = np.array(self.weights[layer_index])
+            layer_biases = np.array(self.biases[layer_index])
 
-            layer_h = []
-            layer_activation = []
+            h = np.dot(layer_weights, prev_activation) + layer_biases
+            a = np.array([self.activator_function(x) for x in h])
 
-            for neuron_weights, bias in zip(layer_weights, layer_biases):
-                h = sum(w * x for w, x in zip(neuron_weights, prev_activation)) + bias
-                a = self.activator_function(h)
-                layer_h.append(h)
-                layer_activation.append(a)
-
-            hs.append(layer_h)
-            activations.append(layer_activation)
+            hs.append(h)
+            activations.append(a)
 
         return hs, activations
 
     def back_propagation(self, expected_output, hs, activations):
-        deltas = [[] for _ in range(len(self.weights))]
+        deltas = [None] * len(self.weights)
+        expected_output = np.array(expected_output)
 
+        # Delta de la última capa
         last_layer = len(self.weights) - 1
-        deltas[last_layer] = [
-            (output - target) * self.activator_derivative(z)
-            for output, target, z in zip(activations[-1], expected_output, hs[-1])
-        ]
+        output_error = activations[-1] - expected_output
+        deltas[last_layer] = output_error * np.array([self.activator_derivative(z) for z in hs[-1]])
 
-        for l in range(len(self.weights) -2, -1, -1):
-            deltas[l] = []
-            for i in range(len(self.weights[l])):
-                downstream_sum = sum(
-                    deltas[l + 1][k] * self.weights[l + 1][k][i]
-                    for k in range(len(self.weights[l + 1]))
-                )
-                delta = downstream_sum * self.activator_derivative(hs[l][i])
-                deltas[l].append(delta)
+        # Backpropagation
+        for l in range(len(self.weights) - 2, -1, -1):
+            weights_next = np.array(self.weights[l + 1])
+            delta_next = deltas[l + 1]
+            h_current = hs[l]
+            
+            delta = np.dot(weights_next.T, delta_next) * np.array([self.activator_derivative(z) for z in h_current])
+            deltas[l] = delta
 
+        # Actualización de pesos y biases
         for l in range(len(self.weights)):
-            for i in range(len(self.weights[l])):
-                for j in range(len(self.weights[l][i])):
-                    gradient = deltas[l][i] * activations[l][j]
-                    self.weights[l][i][j] -= self.learning_rate * gradient
-                self.biases[l][i] -= self.learning_rate * deltas[l][i]
+            delta = deltas[l]
+            activation = activations[l]
+            
+            # Actualizar pesos
+            weight_gradients = np.outer(delta, activation)
+            self.weights[l] = np.array(self.weights[l]) - self.learning_rate * weight_gradients
+            
+            # Actualizar biases
+            self.biases[l] = np.array(self.biases[l]) - self.learning_rate * delta
 
     def train(self, training_set, expected_outputs, epochs):
+        best_error = float('inf')
+        
         for epoch in range(epochs):
             error = 0
-
-            for x, y in zip(training_set, expected_outputs):
+            np.random.seed(epoch)  # Para reproducibilidad
+            indices = np.random.permutation(len(training_set))
+            
+            for idx in indices:
+                x = training_set[idx]
+                y = expected_outputs[idx]
+                
                 hs, activations = self.forward_propagation(x)
                 output = activations[-1]
                 self.back_propagation(y, hs, activations)
 
-                error += 0.5 * sum((yt - yp) ** 2 for yt, yp in zip(y, output)) / len(y)
+                error += 0.5 * np.sum((np.array(y) - output) ** 2)
 
-            average_error = error/len(training_set)
+            average_error = error / len(training_set)
+            
+            # Early stopping
+            if average_error < best_error:
+                best_error = average_error
+                self.best_weights = copy.deepcopy(self.weights)
+                self.best_biases = copy.deepcopy(self.biases)
+                self.patience_counter = 0
+            else:
+                self.patience_counter += 1
+                if self.patience_counter >= self.patience:
+                    print(f"Early stopping en época {epoch + 1}")
+                    break
+
             # Escribir en archivo
             with open(self.results_file, "a") as f:
                 log_line = f"epoch {epoch + 1} average error - {average_error}\n"
                 f.write(log_line)
-                if(epoch + 1) % 100 == 0:
+                if (epoch + 1) % 100 == 0:
                     print(log_line.strip())
-
-            if self.error_min is None or average_error < self.error_min:
-                self.error_min = average_error
-                self.best_weights = copy.deepcopy(self.weights)
-                self.best_biases = copy.deepcopy(self.biases)
 
         self.weights = copy.deepcopy(self.best_weights)
         self.biases = copy.deepcopy(self.best_biases)
 
     def test(self, input_data):
         hs, activations = self.forward_propagation(input_data)
-        return activations[-1]
+        return activations[-1].tolist()
 
 perceptrons = {
     "step": SingleLayerStepPerceptron,
