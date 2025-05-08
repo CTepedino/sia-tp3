@@ -1,6 +1,0 @@
-{
-  "learning_rate": 0.0001,
-  "epochs": 100000,
-  "perceptron": "non_linear_sigmoid",
-  "dataset": "TP3-ej2-conjunto.csv"
-}

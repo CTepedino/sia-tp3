@@ -1,6 +1,6 @@
 import sys
 import json
-from ref.singleLayerPerceptron import StepPerceptron
+from ref.perceptrons.StepPerceptron import StepPerceptron
 
 if __name__ == "__main__":
 
