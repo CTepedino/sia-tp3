@@ -4,6 +4,30 @@ from PIL import Image
 from perceptron import MultiLayerPerceptron
 from activatorFunctions import non_linear_functions
 from sklearn.model_selection import train_test_split
+import argparse
+import json
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--config', type=str, help='Ruta al archivo JSON de configuración (opcional)')
+args = parser.parse_args()
+
+learning_rate = 0.01
+max_epochs = 1000
+activ_fn_str = "leaky_relu"
+
+if args.config:
+    try:
+        with open(args.config, 'r') as f:
+            config = json.load(f)
+            learning_rate = config.get('learning_rate', learning_rate)
+            max_epochs = config.get('max_epochs', max_epochs)
+            activ_fn_str = config.get('activator_function', activ_fn_str)
+            if activ_fn_str not in non_linear_functions:
+                raise ValueError(f"Función de activación '{activ_fn_str}' no válida. Debe ser una de {list(non_linear_functions.keys())}.")
+            print(f"Configuración cargada desde {args.config}")
+    except Exception as e:
+        print(f"No se pudo cargar el archivo de configuración: {e}")
+        print("Usando valores por defecto.")
 
 # Cargar imágenes y labels
 def load_image_as_array(path_imagen, image_size=(28, 28)):
@@ -61,10 +85,10 @@ def labels_to_one_hot(labels, num_classes=10):
 def main():
     try:
         # Configurar MLP
-        activ_fn, activ_fn_deriv = non_linear_functions["leaky_relu"]
+        activ_fn, activ_fn_deriv = non_linear_functions[activ_fn_str]
         mlp = MultiLayerPerceptron(
             [784, 15, 10],  # 784 = 28x28 píxeles
-            0.01, 
+            learning_rate, 
             activ_fn,
             activ_fn_deriv
         )
@@ -85,7 +109,7 @@ def main():
 
         # Entrenar
         print("Iniciando entrenamiento...")
-        mlp.train(X_train, y_train, epochs=1000)
+        mlp.train(X_train, y_train, epochs=max_epochs)
 
         # Evaluar en conjunto de entrenamiento
         print("\nEvaluación en conjunto de entrenamiento:")
