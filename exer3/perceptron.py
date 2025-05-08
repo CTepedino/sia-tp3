@@ -94,7 +94,7 @@ class MultiLayerPerceptron:
         self.error_min = None
         self.best_weights = None
         self.best_biases = None
-        self.patience = 10  # Para early stopping
+        self.patience = 50  
         self.patience_counter = 0
 
     def forward_propagation(self, input_data):
@@ -146,10 +146,13 @@ class MultiLayerPerceptron:
 
     def train(self, training_set, expected_outputs, epochs):
         best_error = float('inf')
+        error_history = []
+        min_delta = 1e-5  
+        window_size = 10  
         
         for epoch in range(epochs):
             error = 0
-            np.random.seed(epoch)  # Para reproducibilidad
+            np.random.seed(epoch)
             indices = np.random.permutation(len(training_set))
             
             for idx in indices:
@@ -163,17 +166,27 @@ class MultiLayerPerceptron:
                 error += 0.5 * np.sum((np.array(y) - output) ** 2)
 
             average_error = error / len(training_set)
+            error_history.append(average_error)
             
-            # Early stopping
-            if average_error < best_error:
+            
+            if average_error < (best_error - min_delta):
                 best_error = average_error
                 self.best_weights = copy.deepcopy(self.weights)
                 self.best_biases = copy.deepcopy(self.biases)
                 self.patience_counter = 0
             else:
                 self.patience_counter += 1
+                
+                # Verificar tendencia en la ventana de observación
+                if len(error_history) >= window_size:
+                    recent_errors = error_history[-window_size:]
+                    # Verificar si hay una tendencia clara de empeoramiento
+                    if all(recent_errors[i] > recent_errors[i-1] * 1.01 for i in range(1, len(recent_errors))):
+                        print(f"Early stopping en época {epoch + 1} - Error aumenta consistentemente en {window_size} épocas")
+                        break
+                
                 if self.patience_counter >= self.patience:
-                    print(f"Early stopping en época {epoch + 1}")
+                    print(f"Early stopping en época {epoch + 1} - Paciencia agotada después de {self.patience} épocas sin mejora")
                     break
 
             # Escribir en archivo
