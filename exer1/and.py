@@ -1,7 +1,28 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import argparse
+import json
 from datetime import datetime
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--config', type=str, help='Ruta al archivo JSON de configuración (opcional)')
+args = parser.parse_args()
+
+learning_rate = 0.1
+max_epochs = 10
+
+if args.config:
+    try:
+        with open(args.config, 'r') as f:
+            config = json.load(f)
+            learning_rate = config.get('learning_rate', learning_rate)
+            max_epochs = config.get('max_epochs', max_epochs)
+            print(f"Configuración cargada desde {args.config}")
+    except Exception as e:
+        print(f"No se pudo cargar el archivo de configuración: {e}")
+        print("Usando valores por defecto.")
+
 
 os.makedirs('results', exist_ok=True)
 timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
@@ -19,11 +40,6 @@ y = np.array([-1, -1, -1, 1])
 
 # bias como w[0])
 w = np.random.uniform(-1, 1, X.shape[1] + 1)
-
-
-learning_rate = 0.1
-max_epochs = 100
-
 
 def tita(x):
     return 1 if x >= 0 else -1
