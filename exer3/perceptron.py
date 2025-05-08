@@ -66,9 +66,10 @@ class SingleLayerNonLinearPerceptron(SingleLayerPerceptron):
 
 
 class MultiLayerPerceptron:
-    def __init__(self, layers, learning_rate, activator_function, activator_derivative = lambda x: 1):
+    def __init__(self, layers, learning_rate, activator_function, activator_derivative = lambda x: 1, optimizer="gradient"):
         self.layers = layers
         self.learning_rate = learning_rate
+        self.optimizer = optimizer
         timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
         results_directory = "results/results_ex3_mlp_" + timestamp
         os.makedirs(results_directory, exist_ok=True)
@@ -92,6 +93,58 @@ class MultiLayerPerceptron:
         self.best_weights = None
         self.patience = 50
         self.patience_counter = 0
+
+        # Parámetros para ADAM
+        if self.optimizer == "adam":
+            self.beta1 = 0.9
+            self.beta2 = 0.999
+            self.epsilon = 1e-8
+            self.alpha = learning_rate  # Tasa de aprendizaje base
+            self.m = [np.zeros_like(np.array(w)) for w in self.weights]  # Primer momento
+            self.v = [np.zeros_like(np.array(w)) for w in self.weights]  # Segundo momento
+            self.t = 0  # Paso de tiempo
+
+            # Ajustar parámetros para problemas simples
+            if len(layers) <= 3 and max(layers) <= 10:  # Problemas simples como XOR o par/impar
+                self.beta1 = 0.8  # Menor momentum
+                self.beta2 = 0.9  # Menor adaptación
+                self.epsilon = 1e-6  # Mayor epsilon para evitar divisiones por cero
+                self.alpha = learning_rate * 0.1  # Learning rate más conservador
+
+    def update_weights_gradient(self, l, delta, activation):
+        weight_gradients = np.outer(delta, activation)
+        self.weights[l] = np.array(self.weights[l]) - self.learning_rate * weight_gradients
+
+    def update_weights_adam(self, l, delta, activation):
+        self.t += 1
+        weight_gradients = np.outer(delta, activation)
+        
+        # Actualizar momentos
+        self.m[l] = self.beta1 * self.m[l] + (1 - self.beta1) * weight_gradients
+        self.v[l] = self.beta2 * self.v[l] + (1 - self.beta2) * np.square(weight_gradients)
+        
+        # Corregir sesgo
+        m_hat = self.m[l] / (1 - self.beta1 ** self.t)
+        v_hat = self.v[l] / (1 - self.beta2 ** self.t)
+        
+        # Actualizar pesos con learning rate adaptativo
+        update = self.alpha * m_hat / (np.sqrt(v_hat) + self.epsilon)
+        
+        # Limitar el tamaño de la actualización para problemas simples
+        if len(self.layers) <= 3 and max(self.layers) <= 10:
+            update = np.clip(update, -0.1, 0.1)  # Limitar actualizaciones grandes
+            
+        self.weights[l] = np.array(self.weights[l]) - update
+
+        # Logging para debug
+        if self.t % 100 == 0:
+            with open(self.results_file, "a") as f:
+                f.write(f"ADAM Debug - Layer {l}:\n")
+                f.write(f"Gradients mean: {np.mean(weight_gradients):.6f}\n")
+                f.write(f"m_hat mean: {np.mean(m_hat):.6f}\n")
+                f.write(f"v_hat mean: {np.mean(v_hat):.6f}\n")
+                f.write(f"Update mean: {np.mean(update):.6f}\n")
+                f.write(f"Weights mean: {np.mean(self.weights[l]):.6f}\n\n")
 
     def forward_propagation(self, input_data):
         activations = [np.array(input_data)]
@@ -136,15 +189,23 @@ class MultiLayerPerceptron:
             # Agregar bias como una columna
             activation = np.append(activations[l], 1.0)
             
-            # Actualizar pesos (incluyendo bias)
-            weight_gradients = np.outer(delta, activation)
-            self.weights[l] = np.array(self.weights[l]) - self.learning_rate * weight_gradients
+            # Actualizar pesos según el optimizador seleccionado
+            if self.optimizer == "adam":
+                self.update_weights_adam(l, delta, activation)
+            else:  # gradient descent por defecto
+                self.update_weights_gradient(l, delta, activation)
 
     def train(self, training_set, expected_outputs, epochs):
         best_error = float('inf')
         error_history = []
         min_delta = 1e-5
         window_size = 10
+        
+        # Inicializar ADAM si es necesario
+        if self.optimizer == "adam":
+            self.t = 0
+            self.m = [np.zeros_like(np.array(w)) for w in self.weights]
+            self.v = [np.zeros_like(np.array(w)) for w in self.weights]
         
         for epoch in range(epochs):
             error = 0
@@ -186,6 +247,8 @@ class MultiLayerPerceptron:
                 f.write(log_line)
                 if (epoch + 1) % 100 == 0:
                     print(log_line.strip())
+                    if self.optimizer == "adam":
+                        print(f"ADAM - t: {self.t}, learning rate: {self.alpha}")
 
         self.weights = copy.deepcopy(self.best_weights)
 

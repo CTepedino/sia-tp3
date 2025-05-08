@@ -14,6 +14,7 @@ args = parser.parse_args()
 learning_rate = 0.01
 max_epochs = 1000
 activ_fn_str = "leaky_relu"
+optimizer = "gradient"  # valor por defecto
 
 if args.config:
     try:
@@ -22,8 +23,11 @@ if args.config:
             learning_rate = config.get('learning_rate', learning_rate)
             max_epochs = config.get('max_epochs', max_epochs)
             activ_fn_str = config.get('activator_function', activ_fn_str)
+            optimizer = config.get('optimizer', optimizer)
             if activ_fn_str not in non_linear_functions:
                 raise ValueError(f"Función de activación '{activ_fn_str}' no válida. Debe ser una de {list(non_linear_functions.keys())}.")
+            if optimizer not in ["gradient", "adam"]:
+                raise ValueError(f"Optimizador '{optimizer}' no válido. Debe ser 'gradient' o 'adam'.")
             print(f"Configuración cargada desde {args.config}")
     except Exception as e:
         print(f"No se pudo cargar el archivo de configuración: {e}")
@@ -90,7 +94,8 @@ def main():
             [784, 30, 10],  # 784 = 28x28 píxeles
             learning_rate, 
             activ_fn,
-            activ_fn_deriv
+            activ_fn_deriv,
+            optimizer
         )
 
         # Cargar datos

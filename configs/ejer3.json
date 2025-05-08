@@ -1,5 +1,6 @@
 {
     "learning_rate": 0.01,
     "max_epochs": 1000,
-    "activator_function": "tanh"
+    "activator_function": "leaky_relu",
+    "optimizer": "gradient"
 }

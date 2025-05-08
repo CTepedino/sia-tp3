@@ -10,6 +10,7 @@ args = parser.parse_args()
 learning_rate = 0.1
 max_epochs = 1000
 activ_fn_str = "tanh"
+optimizer = "gradient"  # valor por defecto
 
 if args.config:
     try:
@@ -18,8 +19,11 @@ if args.config:
             learning_rate = config.get('learning_rate', learning_rate)
             max_epochs = config.get('max_epochs', max_epochs)
             activ_fn_str = config.get('activator_function', activ_fn_str)
+            optimizer = config.get('optimizer', optimizer)
             if activ_fn_str not in non_linear_functions:
                 raise ValueError(f"Función de activación '{activ_fn_str}' no válida. Debe ser una de {list(non_linear_functions.keys())}.")
+            if optimizer not in ["gradient", "adam"]:
+                raise ValueError(f"Optimizador '{optimizer}' no válido. Debe ser 'gradient' o 'adam'.")
             print(f"Configuración cargada desde {args.config}")
     except Exception as e:
         print(f"No se pudo cargar el archivo de configuración: {e}")
@@ -57,7 +61,8 @@ mlp = MultiLayerPerceptron(
     [35, 10],  # Capa oculta de 20, salida de 10 neuronas
     learning_rate,
     activ_fn,
-    activ_fn_deriv
+    activ_fn_deriv,
+    optimizer
 )
 
 mlp.train(train_x, train_y, epochs=max_epochs)
