@@ -52,7 +52,7 @@ def get_next_index(output_dir, digit):
     
     return max(indices) + 1 if indices else 0
 
-def generate_training_set(output_dir="./exer3/numeros", samples_per_number=50):
+def generate_training_set(output_dir="./utils/numeros", samples_per_number=50):
     # Crear directorio si no existe
     os.makedirs(output_dir, exist_ok=True)
     

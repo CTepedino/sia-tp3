@@ -13,24 +13,20 @@ def load_digit_data(file_path):
         flat_input = [int(char) for row in digit_matrix for char in row.split()]
         samples.append(flat_input)
 
-    # One-hot encoding
-    outputs = []
-    for label in labels:
-        one_hot = [0] * 10
-        one_hot[label] = 1
-        outputs.append(one_hot)
+    outputs = [[label % 2] for label in labels]
 
     return samples, outputs
 
 # Cargar los datos
-train_x, train_y = load_digit_data("./exer3/TP3-ej3-digitos.txt")
+train_x, train_y = load_digit_data("./training/TP3-ej3-digitos.txt")
 
 # Elegir funciones
 activ_fn, activ_fn_deriv = non_linear_functions["tanh"]
 
 # Instanciar y entrenar el MLP
 mlp = MultiLayerPerceptron(
-    [20, 10],  # Capa oculta de 20, salida de 10 neuronas
+    #35 x el tamaño de la entrada
+    [35, 1],
     0.1,
     activ_fn,
     activ_fn_deriv
@@ -40,6 +36,7 @@ mlp.train(train_x, train_y, epochs=1000)
 
 # Testeo
 for i in range(10):
-    output = mlp.test(train_x[i])
-    pred = output.index(max(output))
-    print(f"Dígito real: {i}, Predicción: {pred}, Salida cruda: {[round(o, 3) for o in output]} {'✅' if pred == i else '❌'}")
+    output = mlp.test(train_x[i])[0]
+    expected = train_y[i][0]
+    pred = round(output)
+    print(f"Dígito {i}: Salida={output:.4f}, Predicción={"impar" if pred == 1 else "par"}, Esperado={"impar" if expected == 1 else "par"} {"✅" if pred == expected else "❌"}")

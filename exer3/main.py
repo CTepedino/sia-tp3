@@ -1,8 +1,8 @@
 import json
 import sys
 
-from activatorFunctions import non_linear_functions
-from perceptron import perceptrons
+from utils.activatorFunctions import non_linear_functions
+from utils.perceptron import perceptrons
 
 if __name__ == "__main__":
 

@@ -70,14 +70,14 @@ def main():
         )
 
         # Cargar datos
-        data_path = "./exer3/numeros"
+        data_path = "./training/numeros"
         print(f"Cargando imágenes desde {data_path}...")
         X, labels = load_images_from_folder(data_path)
         y = labels_to_one_hot(labels)
 
         # Dividir en conjuntos de entrenamiento y prueba
         X_train, X_test, y_train, y_test, labels_train, labels_test = train_test_split(
-            X, y, labels, test_size=0.1, random_state=42
+            X, y, labels, test_size=0.2, random_state=42
         )
 
         print(f"Conjunto de entrenamiento: {len(X_train)} imágenes")

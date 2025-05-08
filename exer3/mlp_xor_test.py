@@ -31,7 +31,7 @@ mlp = MultiLayerPerceptron(
     activator_derivative=sigmoid_derivative
 )
 
-mlp.train(xor_inputs, xor_outputs, 10000)
+mlp.train(xor_inputs, xor_outputs, 1000)
 
 print("\n--- XOR Results ---")
 for i in range(len(xor_inputs)):
