@@ -2,7 +2,8 @@ import csv
 import sys
 import json
 
-from ref.singleLayerPerceptron import LinearPerceptron, NonLinearPerceptron
+from ref.normalizers import standarize_input
+from ref.singleLayerPerceptron import LinearPerceptron, SigmoidPerceptron, TanhPerceptron
 from ref.activatorFunctions import non_linear_functions
 
 import numpy as np
@@ -21,27 +22,18 @@ if __name__ == "__main__":
 
     inputs, expected_outputs = load_dataset(config["dataset"])
 
-    #normalizo inputs
-    inputs_mean = inputs.mean(axis=0)
-    inputs_std = inputs.std(axis=0)
-    inputs = (inputs - inputs_mean) / inputs_std
+    inputs = standarize_input(inputs)
 
     lr = config["learning_rate"]
     match config["perceptron"]:
         case "linear":
             perceptron = LinearPerceptron(len(inputs[0]), lr)
         case "non_linear_sigmoid":
-            #normalizo outputs a 0, 1
-            expected_outputs = (expected_outputs - np.min(expected_outputs)) / (np.max(expected_outputs) - np.min(expected_outputs))
-
             function, derivative = non_linear_functions["sigmoid"]
-            perceptron = NonLinearPerceptron(len(inputs[0]), lr, function, derivative)
+            perceptron = SigmoidPerceptron(len(inputs[0]), lr)
         case "non_linear_tanh":
-            #normalizo outputs a -1, 1
-            expected_outputs = 2 * (expected_outputs - np.min(expected_outputs)) / (np.max(expected_outputs) - np.min(expected_outputs)) - 1
-
             function, derivative = non_linear_functions["tanh"]
-            perceptron = NonLinearPerceptron(len(inputs[0]), lr, function, derivative)
+            perceptron = TanhPerceptron(len(inputs[0]), lr)
         case _:
             perceptron = None
 

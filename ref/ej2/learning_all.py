@@ -3,7 +3,7 @@ import sys
 
 import numpy as np
 
-from ref.normalizers import standarize_input, normalize_output_sigmoid, normalize_output_tanh
+from ref.normalizers import standarize_input
 from ref.singleLayerPerceptron import LinearPerceptron, SigmoidPerceptron, TanhPerceptron
 
 
@@ -20,28 +20,25 @@ if __name__ == "__main__":
 
     inputs, expected_outputs = load_dataset(config["dataset"])
 
-    seed = config["seed"]
     learning_rates = config["learning_rates"]
     epochs = config["epochs"]
 
     out_file = "results.csv"
 
     inputs = standarize_input(inputs)
-    sigmoid_expected_outputs = normalize_output_sigmoid(expected_outputs)
-    tanh_expected_outputs = normalize_output_tanh(expected_outputs)
 
     with open(out_file, "w") as f:
         for lr in learning_rates:
-            linear = LinearPerceptron(len(inputs[0]), lr, seed=seed)
+            linear = LinearPerceptron(len(inputs[0]), lr)
             linear.train(inputs, expected_outputs, epochs)
             f.write(f"linear,{lr},{linear.error_min_epoch},{linear.error_min}\n")
 
-            sigmoid = SigmoidPerceptron(len(inputs[0]), lr, seed=seed)
-            sigmoid.train(inputs, sigmoid_expected_outputs, epochs)
+            sigmoid = SigmoidPerceptron(len(inputs[0]), lr)
+            sigmoid.train(inputs, expected_outputs, epochs)
             f.write(f"sigmoid,{lr},{sigmoid.error_min_epoch},{sigmoid.error_min}\n")
 
-            tanh = TanhPerceptron(len(inputs[0]), lr, seed=seed)
-            tanh.train(inputs, tanh_expected_outputs, epochs)
+            tanh = TanhPerceptron(len(inputs[0]), lr)
+            tanh.train(inputs, expected_outputs, epochs)
             f.write(f"tanh,{lr},{tanh.error_min_epoch},{tanh.error_min}\n")
 
 

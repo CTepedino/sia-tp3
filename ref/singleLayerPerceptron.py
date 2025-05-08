@@ -14,7 +14,7 @@ def mse_error(y, output):
     return 0.5 * ((y-output)**2)
 
 class SingleLayerPerceptron(ABC):
-    def __init__(self, input_size, learning_rate, activator_function, error_function, activator_derivative = lambda x: 1, output_normalizer = lambda x: x, output_denormalizer = lambda x, x_min, x_max: x, seed = None):
+    def __init__(self, input_size, learning_rate, activator_function, error_function, activator_derivative = lambda x: 1, output_normalizer = lambda x: (x, min(x), max(x)), output_denormalizer = lambda x, x_min, x_max: x, seed = None):
         if seed is not None:
             random.seed(seed)
 
@@ -33,14 +33,12 @@ class SingleLayerPerceptron(ABC):
         self.error_min_epoch = None
 
     def train(self, training_set, expected_outputs, epochs):
-        min_output = min(expected_outputs)
-        max_output = max(expected_outputs)
 
-        normalized_outputs = self.output_normalizer(expected_outputs)
+        normalized_outputs, min_output, max_output = self.output_normalizer(expected_outputs)
 
         for epoch in range(epochs):
             error = 0
-            for x, y in zip(training_set, expected_outputs):
+            for x, y in zip(training_set, normalized_outputs):
                 x_with_bias = x + [1]
                 h = sum(w * x_i for w, x_i in zip(self.weights, x_with_bias))
 
