@@ -63,4 +63,4 @@ for i in range(10):
     output = mlp.test(train_x[i])[0]
     expected = train_y[i][0]
     pred = round(output)
-    print(f"Dígito {i}: Salida={output:.4f}, Predicción={"impar" if pred == 1 else "par"}, Esperado={"impar" if expected == 1 else "par"} {"✅" if pred == expected else "❌"}")
+    print(f"Dígito {i}: Salida={output:.4f}, Predicción={'impar' if pred == 1 else 'par'}, Esperado={'impar' if expected == 1 else 'par'} {'✅' if pred == expected else '❌'}")

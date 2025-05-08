@@ -80,75 +80,71 @@ class MultiLayerPerceptron:
 
         # Inicialización de Xavier/Glorot para los pesos
         self.weights = []
-        self.biases = []
         
         for i in range(len(layers) - 1):
-            # Xavier/Glorot initialization
-            scale = np.sqrt(2.0 / (layers[i] + layers[i + 1]))
-            layer_weights = np.random.normal(0, scale, (layers[i + 1], layers[i]))
-            layer_biases = np.random.normal(0, scale, layers[i + 1])
-            
-            self.weights.append(layer_weights.tolist())
-            self.biases.append(layer_biases.tolist())
+            neurons = layers[i + 1]
+            inputs = layers[i] + 1  # +1 por bias
+            # Xavier/Glorot initialization: scale = sqrt(2.0 / (fan_in + fan_out))
+            scale = np.sqrt(2.0 / (inputs + neurons))
+            self.weights.append(np.random.normal(0, scale, (neurons, inputs)).tolist())
 
-        self.error_min = None
+        self.min_error = None
         self.best_weights = None
-        self.best_biases = None
-        self.patience = 50  
+        self.patience = 50
         self.patience_counter = 0
 
     def forward_propagation(self, input_data):
         activations = [np.array(input_data)]
-        hs = []
+        hidden_states = []
 
         for layer_index in range(len(self.weights)):
-            prev_activation = activations[-1]
+            # Agregar bias como una columna
+            prev_activation = np.append(activations[-1], 1.0)
             layer_weights = np.array(self.weights[layer_index])
-            layer_biases = np.array(self.biases[layer_index])
 
-            h = np.dot(layer_weights, prev_activation) + layer_biases
+            # Calcular salida de la capa
+            h = np.dot(layer_weights, prev_activation)
             a = np.array([self.activator_function(x) for x in h])
 
-            hs.append(h)
+            hidden_states.append(h)
             activations.append(a)
 
-        return hs, activations
+        return hidden_states, activations
 
-    def back_propagation(self, expected_output, hs, activations):
+    def back_propagation(self, expected_output, hidden_states, activations):
         deltas = [None] * len(self.weights)
         expected_output = np.array(expected_output)
 
         # Delta de la última capa
         last_layer = len(self.weights) - 1
         output_error = activations[-1] - expected_output
-        deltas[last_layer] = output_error * np.array([self.activator_derivative(z) for z in hs[-1]])
+        deltas[last_layer] = output_error * np.array([self.activator_derivative(z) for z in hidden_states[-1]])
 
         # Backpropagation
         for l in range(len(self.weights) - 2, -1, -1):
-            weights_next = np.array(self.weights[l + 1])
-            delta_next = deltas[l + 1]
-            h_current = hs[l]
+            next_weights = np.array(self.weights[l + 1])
+            next_delta = deltas[l + 1]
+            current_h = hidden_states[l]
             
-            delta = np.dot(weights_next.T, delta_next) * np.array([self.activator_derivative(z) for z in h_current])
+            # Calcular delta sin considerar el bias
+            delta = np.dot(next_weights[:, :-1].T, next_delta) * np.array([self.activator_derivative(z) for z in current_h])
             deltas[l] = delta
 
-        # Actualización de pesos y biases
+        # Actualización de pesos
         for l in range(len(self.weights)):
             delta = deltas[l]
-            activation = activations[l]
+            # Agregar bias como una columna
+            activation = np.append(activations[l], 1.0)
             
-            # Actualizar pesos
+            # Actualizar pesos (incluyendo bias)
             weight_gradients = np.outer(delta, activation)
             self.weights[l] = np.array(self.weights[l]) - self.learning_rate * weight_gradients
-            
-            # Actualizar biases
-            self.biases[l] = np.array(self.biases[l]) - self.learning_rate * delta
 
     def train(self, training_set, expected_outputs, epochs):
         best_error = float('inf')
         error_history = []
-        min_delta = 1e-5  
-        window_size = 10  
+        min_delta = 1e-5
+        window_size = 10
         
         for epoch in range(epochs):
             error = 0
@@ -159,28 +155,24 @@ class MultiLayerPerceptron:
                 x = training_set[idx]
                 y = expected_outputs[idx]
                 
-                hs, activations = self.forward_propagation(x)
+                hidden_states, activations = self.forward_propagation(x)
                 output = activations[-1]
-                self.back_propagation(y, hs, activations)
+                self.back_propagation(y, hidden_states, activations)
 
                 error += 0.5 * np.sum((np.array(y) - output) ** 2)
 
             average_error = error / len(training_set)
             error_history.append(average_error)
             
-            
             if average_error < (best_error - min_delta):
                 best_error = average_error
                 self.best_weights = copy.deepcopy(self.weights)
-                self.best_biases = copy.deepcopy(self.biases)
                 self.patience_counter = 0
             else:
                 self.patience_counter += 1
                 
-                # Verificar tendencia en la ventana de observación
                 if len(error_history) >= window_size:
                     recent_errors = error_history[-window_size:]
-                    # Verificar si hay una tendencia clara de empeoramiento
                     if all(recent_errors[i] > recent_errors[i-1] * 1.01 for i in range(1, len(recent_errors))):
                         print(f"Early stopping en época {epoch + 1} - Error aumenta consistentemente en {window_size} épocas")
                         break
@@ -189,7 +181,6 @@ class MultiLayerPerceptron:
                     print(f"Early stopping en época {epoch + 1} - Paciencia agotada después de {self.patience} épocas sin mejora")
                     break
 
-            # Escribir en archivo
             with open(self.results_file, "a") as f:
                 log_line = f"epoch {epoch + 1} average error - {average_error}\n"
                 f.write(log_line)
@@ -197,10 +188,9 @@ class MultiLayerPerceptron:
                     print(log_line.strip())
 
         self.weights = copy.deepcopy(self.best_weights)
-        self.biases = copy.deepcopy(self.best_biases)
 
     def test(self, input_data):
-        hs, activations = self.forward_propagation(input_data)
+        hidden_states, activations = self.forward_propagation(input_data)
         return activations[-1].tolist()
 
 perceptrons = {

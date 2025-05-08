@@ -87,7 +87,7 @@ def main():
         # Configurar MLP
         activ_fn, activ_fn_deriv = non_linear_functions[activ_fn_str]
         mlp = MultiLayerPerceptron(
-            [784, 15, 10],  # 784 = 28x28 píxeles
+            [784, 30, 10],  # 784 = 28x28 píxeles
             learning_rate, 
             activ_fn,
             activ_fn_deriv
