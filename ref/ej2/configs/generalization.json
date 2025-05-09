@@ -1,6 +1,6 @@
 {
-  "partition_count": 10,
   "seed": 42,
+  "partition_count": 28,
   "epochs": 100000,
   "learning_rate": 0.001,
   "perceptron": "sigmoid"

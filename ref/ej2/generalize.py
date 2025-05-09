@@ -3,6 +3,8 @@ import json
 import sys
 import random
 
+import numpy as np
+
 from ref.perceptrons.LinearPerceptron import LinearPerceptron
 from ref.perceptrons.SigmoidPerceptron import SigmoidPerceptron
 from ref.perceptrons.TanhPerceptron import TanhPerceptron
@@ -79,7 +81,8 @@ if __name__ == "__main__":
             fold_error = 0
             for x, y in zip(test_inputs, test_outputs):
                 predicted = perceptron.test(x)
-                fold_error += perceptron.error(y, predicted)
+                fold_error += mse(y, predicted)
+                print(f"{x} - real: {y} - predicted: {predicted}")
             fold_error /= len(test_fold)
 
             errors.append(fold_error)
@@ -88,8 +91,12 @@ if __name__ == "__main__":
 
         train_error = train_error / k
         test_error = sum(errors) / k
+
         print(f"\nAverage MSE over {k} folds: {test_error:.4f}")
 
-        f.write(f"{config['perceptron']},{learning_rate},{epochs},{k},{train_error},{test_error}")
+        mean_error = np.mean(errors)
+        std_mse = np.std(errors, ddof=1)
+
+        f.write(f"{config['perceptron']},{learning_rate},{epochs},{k},{train_error},{test_error},{mean_error},{std_mse}\n")
 
 
