@@ -110,10 +110,22 @@ class MultiLayerPerceptron:
                 self.beta2 = 0.9  # Menor adaptación
                 self.epsilon = 1e-6  # Mayor epsilon para evitar divisiones por cero
                 self.alpha = learning_rate * 0.1  # Learning rate más conservador
+        
+        # Parámetros para Momentum
+        elif self.optimizer == "momentum":
+            self.momentum = 0.9  # Factor de momentum
+            self.velocity = [np.zeros_like(np.array(w)) for w in self.weights]  # Velocidad inicial
 
     def update_weights_gradient(self, l, delta, activation):
         weight_gradients = np.outer(delta, activation)
         self.weights[l] = np.array(self.weights[l]) - self.learning_rate * weight_gradients
+
+    def update_weights_momentum(self, l, delta, activation):
+        weight_gradients = np.outer(delta, activation)
+        # Actualizar velocidad con momentum
+        self.velocity[l] = self.momentum * self.velocity[l] - self.learning_rate * weight_gradients
+        # Actualizar pesos usando la velocidad
+        self.weights[l] = np.array(self.weights[l]) + self.velocity[l]
 
     def update_weights_adam(self, l, delta, activation):
         self.t += 1
@@ -192,6 +204,8 @@ class MultiLayerPerceptron:
             # Actualizar pesos según el optimizador seleccionado
             if self.optimizer == "adam":
                 self.update_weights_adam(l, delta, activation)
+            elif self.optimizer == "momentum":
+                self.update_weights_momentum(l, delta, activation)
             else:  # gradient descent por defecto
                 self.update_weights_gradient(l, delta, activation)
 

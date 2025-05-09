@@ -26,8 +26,8 @@ if args.config:
             optimizer = config.get('optimizer', optimizer)
             if activ_fn_str not in non_linear_functions:
                 raise ValueError(f"Función de activación '{activ_fn_str}' no válida. Debe ser una de {list(non_linear_functions.keys())}.")
-            if optimizer not in ["gradient", "adam"]:
-                raise ValueError(f"Optimizador '{optimizer}' no válido. Debe ser 'gradient' o 'adam'.")
+            if optimizer not in ["gradient", "adam", "momentum"]:
+                raise ValueError(f"Optimizador '{optimizer}' no válido. Debe ser 'gradient', 'adam' o 'momentum'.")
             print(f"Configuración cargada desde {args.config}")
     except Exception as e:
         print(f"No se pudo cargar el archivo de configuración: {e}")
