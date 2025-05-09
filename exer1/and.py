@@ -23,11 +23,11 @@ if args.config:
         print(f"No se pudo cargar el archivo de configuración: {e}")
         print("Usando valores por defecto.")
 
-
 os.makedirs('results', exist_ok=True)
 timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-save_results = "results/result_ex1_and_"+timestamp
+save_results = "./exer1/results/result_ex1_and_"+timestamp
 os.makedirs(save_results)
+
 X = np.array([
     [-1, -1],
     [-1, 1],
@@ -35,10 +35,8 @@ X = np.array([
     [1, 1]
 ])
 
-# Salidas
 y = np.array([-1, -1, -1, 1])
 
-# bias como w[0])
 w = np.random.uniform(-1, 1, X.shape[1] + 1)
 
 def tita(x):
@@ -71,7 +69,6 @@ def plot_decision_boundary(X, y, w, epoch, iteration, save_path):
     plt.close()
 
 
-# Entrenamiento
 for epoch in range(max_epochs):
     total_error = 0
     for iteration, (xi, target) in enumerate(zip(X, y)):
@@ -89,8 +86,6 @@ for epoch in range(max_epochs):
         break
             
 
-
-# Prueba final
 print("\nPrueba final:")
 for xi in X:
     xi_ext = np.insert(xi, 0, 1)

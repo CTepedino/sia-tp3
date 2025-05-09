@@ -25,10 +25,9 @@ if args.config:
 
 os.makedirs('results', exist_ok=True)
 timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-save_results = "results/result_ex1_xor_"+timestamp
+save_results = "./exer1/results/result_ex1_xor_"+timestamp
 os.makedirs(save_results)
 
-# Entradas originales
 X = np.array([
     [-1, -1],
     [-1, 1],
@@ -36,12 +35,9 @@ X = np.array([
     [1, 1]
 ])
 
-# Salidas
 y = np.array([-1, 1, 1, -1])
 
-# Peso para bias (w[0]) más peso para "cantidad de diferencias" (w[1])
 w = np.random.uniform(-1, 1, 2)
-
 
 def tita(x):
     return 1 if x >= 0 else -1
@@ -80,7 +76,7 @@ def plot_decision_boundary(X, y, w, epoch, iteration, save_path):
 for epoch in range(max_epochs):
     total_error = 0
     for iteration, (xi, target) in enumerate(zip(X, y)):
-        xi_transf = np.array([1, cantidad_diferencias(xi)])  # Agregamos bias
+        xi_transf = np.array([1, cantidad_diferencias(xi)])
         output = tita(np.dot(w, xi_transf))
         delta = target - output
         if output != target:
