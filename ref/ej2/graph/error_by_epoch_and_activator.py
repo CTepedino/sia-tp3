@@ -30,7 +30,7 @@ if __name__ == "__main__":
     plt.tight_layout()
 
     plt.xlim(0, 5000)
-    plt.ylim(0, 500)
+    plt.ylim(0, 200)
 
     plt.legend()
     plt.show()
