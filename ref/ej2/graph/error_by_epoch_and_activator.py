@@ -29,8 +29,8 @@ if __name__ == "__main__":
     plt.grid(True)
     plt.tight_layout()
 
-    plt.xlim(0, 5000)
-    plt.ylim(0, 200)
+    plt.ylim(0, 50)
+    plt.xlim(0, 25000)
 
     plt.legend()
     plt.show()
