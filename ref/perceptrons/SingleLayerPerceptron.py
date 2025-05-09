@@ -25,6 +25,7 @@ class SingleLayerPerceptron(ABC):
         return w + self.learning_rate * (y-output) * x
 
     def train(self, training_set, expected_outputs, epochs):
+        f = open("avg_err_by_epoch", "w")
         for epoch in range(epochs):
             error = 0
             for x, y in zip(training_set, expected_outputs):
@@ -38,13 +39,15 @@ class SingleLayerPerceptron(ABC):
 
             average_error = error/len(training_set)
             #print(f"epoch {epoch + 1} average error - {average_error}")
-
+            f.write(f"{epoch+1},{average_error}\n")
             if self.error_min is None or average_error < self.error_min:
                 self.error_min = average_error
                 self.best_weights = self.weights
                 self.error_min_epoch = epoch + 1
 
         self.weights = self.best_weights
+
+        f.close()
 
 
     def test(self, x):

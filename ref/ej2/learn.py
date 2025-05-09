@@ -39,8 +39,10 @@ if __name__ == "__main__":
     perceptron = perceptrons[config["perceptron"]](len(inputs[0]), learning_rate, seed = seed)
     perceptron.train(inputs, outputs, epochs)
 
-    #with open("result.csv", "a") as f:
-     #   f.write(f"{config['perceptron']},{learning_rate},{perceptron.error_min_epoch},{perceptron.error_min}\n")
+    print(perceptron.error_min)
 
-    for x, y in zip(inputs, outputs):
-        print(f"in: {x}, expected: {y}, obtained: {perceptron.test(x)}")
+    # with open("result.csv", "a") as f:
+    #     f.write(f"{config['perceptron']},{learning_rate},{perceptron.error_min_epoch},{perceptron.error_min}\n")
+
+    #for x, y in zip(inputs, outputs):
+    #    print(f"in: {x}, expected: {y}, obtained: {perceptron.test(x)}")
