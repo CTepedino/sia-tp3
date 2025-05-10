@@ -1,4 +1,4 @@
-from ref.perceptrons.NonLinearPerceptron import NonLinearPerceptron
+from perceptrons.NonLinearPerceptron import NonLinearPerceptron
 import math
 
 class TanhPerceptron(NonLinearPerceptron):

@@ -1,4 +1,4 @@
-from ref.perceptrons.SingleLayerPerceptron import SingleLayerPerceptron
+from perceptrons.SingleLayerPerceptron import SingleLayerPerceptron
 from abc import ABC, abstractmethod
 
 class NonLinearPerceptron(SingleLayerPerceptron, ABC):

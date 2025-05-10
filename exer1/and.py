@@ -1,49 +1,18 @@
+import sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import argparse
 import json
 from datetime import datetime
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--config', type=str, help='Ruta al archivo JSON de configuración (opcional)')
-args = parser.parse_args()
-
-learning_rate = 0.1
-max_epochs = 10
-
-if args.config:
-    try:
-        with open(args.config, 'r') as f:
-            config = json.load(f)
-            learning_rate = config.get('learning_rate', learning_rate)
-            max_epochs = config.get('max_epochs', max_epochs)
-            print(f"Configuración cargada desde {args.config}")
-    except Exception as e:
-        print(f"No se pudo cargar el archivo de configuración: {e}")
-        print("Usando valores por defecto.")
-
-os.makedirs('results', exist_ok=True)
-timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-save_results = "./exer1/results/result_ex1_and_"+timestamp
-os.makedirs(save_results)
-
-X = np.array([
-    [-1, -1],
-    [-1, 1],
-    [1, -1],
-    [1, 1]
-])
-
-y = np.array([-1, -1, -1, 1])
-
-w = np.random.uniform(-1, 1, X.shape[1] + 1)
-
-def tita(x):
-    return 1 if x >= 0 else -1
+from perceptrons.StepPerceptron import StepPerceptron
 
 
 def plot_decision_boundary(X, y, w, epoch, iteration, save_path):
+    X = np.array(X)
+    y = np.array(y)
+    w = np.array(w)
     plt.clf()
     for i in range(len(X)):
         if y[i] == 1:
@@ -69,25 +38,36 @@ def plot_decision_boundary(X, y, w, epoch, iteration, save_path):
     plt.close()
 
 
-for epoch in range(max_epochs):
-    total_error = 0
-    for iteration, (xi, target) in enumerate(zip(X, y)):
-        xi_ext = np.insert(xi, 0, 1)
-        output = tita(np.dot(w, xi_ext))
-        delta = target - output
-        if output != target:
-            w += learning_rate * target * xi_ext
-        filename = f'{save_results}/epoch{epoch + 1}_iter{iteration + 1}.png'
-        plot_decision_boundary(X, y, w, epoch, iteration, filename)
-        total_error+= abs(delta)
-    
-    if total_error == 0:
-        print(f"Entrenamiento terminado en la epoca: {epoch+1}")
-        break
-            
+if __name__ == "__main__":
+    with open(sys.argv[1], "r") as f:
+        config = json.load(f)
 
-print("\nPrueba final:")
-for xi in X:
-    xi_ext = np.insert(xi, 0, 1)
-    output = tita(np.dot(w, xi_ext))
-    print(f"Entrada: {xi} -> Salida predicha: {output}")
+    learning_rate = config["learning_rate"]
+    epochs = config["epochs"]
+
+    os.makedirs('results', exist_ok=True)
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    save_results = "./exer1/results/result_ex1_and_" + timestamp
+    os.makedirs(save_results)
+
+    inputs = [
+        [-1, -1],
+        [-1, 1],
+        [1, -1],
+        [1, 1]
+    ]
+
+    expected_outputs = [-1, -1, -1, 1]
+
+    perceptron = StepPerceptron(2, learning_rate)
+
+    perceptron.train(inputs, expected_outputs, epochs)
+
+    plot_decision_boundary(inputs, expected_outputs, perceptron.weights, epochs, epochs, save_results)
+
+    for x, y in zip(inputs, expected_outputs):
+        output = perceptron.test(x)
+        print(f"IN: {x}, EXPECTED: {y}, PREDICTED: {output}")
+
+
+
