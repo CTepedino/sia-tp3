@@ -1,4 +1,4 @@
-from perceptron import MultiLayerPerceptron
+from perceptrons.MultiLayerPerceptron import MultiLayerPerceptron
 from activatorFunctions import non_linear_functions
 import argparse
 import json

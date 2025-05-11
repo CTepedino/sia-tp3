@@ -2,7 +2,6 @@ import os
 import random
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-import shutil
 
 def create_number_image(number, size=(35, 35), base_font_size=30, noise_level=0.1, 
                        rotation_range=(-10, 10), size_variation=0.3, position_variation=0.2):
