@@ -2,6 +2,7 @@ from perceptron import MultiLayerPerceptron
 from activatorFunctions import non_linear_functions
 import argparse
 import json
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str, help='Ruta al archivo JSON de configuración (opcional)')
@@ -45,13 +46,10 @@ def load_digit_data(file_path):
 
     return samples, outputs
 
-# Cargar los datos
 train_x, train_y = load_digit_data("./training/TP3-ej3-digitos.txt")
 
-# Elegir funciones
 activ_fn, activ_fn_deriv = non_linear_functions[activ_fn_str]
 
-# Instanciar y entrenar el MLP
 mlp = MultiLayerPerceptron(
     #35 x el tamaño de la entrada
     [35, 1],
@@ -63,9 +61,23 @@ mlp = MultiLayerPerceptron(
 
 mlp.train(train_x, train_y, epochs=max_epochs)
 
-# Testeo
-for i in range(10):
-    output = mlp.test(train_x[i])[0]
-    expected = train_y[i][0]
-    pred = round(output)
-    print(f"Dígito {i}: Salida={output:.4f}, Predicción={'impar' if pred == 1 else 'par'}, Esperado={'impar' if expected == 1 else 'par'} {'✅' if pred == expected else '❌'}")
+# Crear el directorio si no existe
+os.makedirs('./exer3/results', exist_ok=True)
+
+# Ruta del archivo de resultados
+result_file_path = './exer3/results/resultados_ej3b.txt'
+
+# Escribir el header solo si el archivo no existe
+if not os.path.exists(result_file_path):
+    with open(result_file_path, 'w') as f:
+        f.write("prediccion,resultado\n")
+
+# Append de resultados
+with open(result_file_path, 'a') as f:
+    for i in range(10):
+        output = mlp.test(train_x[i])[0]
+        expected = train_y[i][0]
+        pred = round(output)
+        resultado_str = '✅' if pred == expected else '❌'
+        f.write(f"{'impar' if pred == 1 else 'par'},{'impar' if expected == 1 else 'par'}\n")
+        print(f"Dígito {i}: Salida={output:.4f}, Predicción={'impar' if pred == 1 else 'par'}, Esperado={'impar' if expected == 1 else 'par'} {resultado_str}")

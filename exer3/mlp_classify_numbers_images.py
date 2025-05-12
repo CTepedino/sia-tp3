@@ -6,6 +6,7 @@ from activatorFunctions import non_linear_functions
 from sklearn.model_selection import train_test_split
 import argparse
 import json
+from datetime import datetime
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str, help='Ruta al archivo JSON de configuración (opcional)')
@@ -128,15 +129,27 @@ def main():
         
         print(f"\nPrecisión en entrenamiento: {correct_train/len(X_train)*100:.2f}%")
 
-        # Evaluar en conjunto de prueba
-        print("\nEvaluación en conjunto de prueba:")
-        correct_test = 0
-        for i, (x, label) in enumerate(zip(X_test, labels_test)):
-            output = mlp.test(x)
-            prediction = output.index(max(output))
-            if prediction == label:
-                correct_test += 1
-            print(f"Imagen {i}: Real={label}, Predicción={prediction} {'✅' if prediction == label else '❌'}")
+        dir_name = f"./exer3/results/{activ_fn_str}_{optimizer}_{learning_rate}"
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        os.makedirs(dir_name, exist_ok=True)
+        results_path = os.path.join(dir_name, f"results_{timestamp}.txt")
+
+        with open(results_path, "w") as f:
+            f.write("prediccion,resultado\n")  # Escribir el encabezado
+
+            print("\nEvaluación en conjunto de prueba:")
+            correct_test = 0
+            for i, (x, label) in enumerate(zip(X_test, labels_test)):
+                output = mlp.test(x)
+                prediction = output.index(max(output))
+                if prediction == label:
+                    correct_test += 1
+
+                # Imprimir en consola
+                print(f"Imagen {i}: Real={label}, Predicción={prediction} {'✅' if prediction == label else '❌'}")
+
+                # Escribir en el archivo
+                f.write(f"{prediction},{label}\n")
         
         print(f"\nPrecisión en prueba: {correct_test/len(X_test)*100:.2f}%")
 
