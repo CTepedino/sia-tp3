@@ -44,6 +44,9 @@ def mse(expected, predicted):
 if __name__ == "__main__":
     inputs, outputs = load_dataset("./TP3-ej2-conjunto.csv")
 
+    output_max = max(outputs)
+    output_min = min(outputs)
+
     with open(sys.argv[1], "r") as f:
         config = json.load(f)
 
@@ -76,6 +79,7 @@ if __name__ == "__main__":
 
 
             perceptron = perceptrons[config["perceptron"]](len(inputs[0]), learning_rate, seed=seed)
+            perceptron.set_bounds(output_min, output_max)
             perceptron.train(train_inputs, train_outputs, epochs)
             print(f"Training error: {perceptron.error_min}")
             train_error += perceptron.error_min

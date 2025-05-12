@@ -25,8 +25,14 @@ class SingleLayerPerceptron(ABC):
         return w + self.learning_rate * (y-output) * x
 
     def train(self, training_set, expected_outputs, epochs):
+
+
         #f = open("avg_err_by_epoch", "w")
         for epoch in range(epochs):
+            combined = list(zip(training_set, expected_outputs))
+            random.shuffle(combined)
+            training_set[:], expected_outputs[:] = zip(*combined)
+
             error = 0
             for x, y in zip(training_set, expected_outputs):
                 x_with_bias = x + [1]
