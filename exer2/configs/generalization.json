@@ -1,6 +1,6 @@
 {
   "partition_count": 28,
-  "epochs": 1000,
-  "learning_rate": 0.001,
-  "perceptron": "tanh"
+  "epochs": 100000,
+  "learning_rate": 0.00001,
+  "perceptron": "sigmoid"
 }
