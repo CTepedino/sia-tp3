@@ -14,7 +14,7 @@ class TanhPerceptron(NonLinearPerceptron):
         return 1 - math.tanh(h)**2
 
     def normalize_output(self, output):
-        return (output - self.min_output) / (self.max_output - self.min_output) - 1
+        return 2 * (output - self.min_output) / (self.max_output - self.min_output) - 1
 
     def denormalize_output(self, normalized_output):
         return ((normalized_output + 1)/2) * (self.max_output - self.min_output) + self.min_output

@@ -12,15 +12,15 @@ def load_dataset(filename):
     return epochs, errors
 
 if __name__ == "__main__":
-    epochs, errors = load_dataset("../linear_avg_err_by_epoch")
+    epochs, errors = load_dataset("../results/linear_avg_err_by_epoch")
 
     plt.figure(figsize=(10, 5))
     plt.plot(epochs, errors, label="linear")
 
-    epochs, errors = load_dataset("../sigmoid_avg_err_by_epoch")
+    epochs, errors = load_dataset("../results/sigmoid_avg_err_by_epoch")
     plt.plot(epochs, errors, label="sigmoid")
 
-    epochs, errors = load_dataset("../tanh_avg_err_by_epoch")
+    epochs, errors = load_dataset("../results/tanh_avg_err_by_epoch")
     plt.plot(epochs, errors, label="tanh")
 
     plt.xlabel("Epoch")

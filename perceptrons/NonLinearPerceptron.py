@@ -7,6 +7,10 @@ class NonLinearPerceptron(SingleLayerPerceptron, ABC):
         self.min_output = None
         self.max_output = None
 
+    def set_bounds(self, min, max):
+        self.min_output = min
+        self.max_output = max
+
     @abstractmethod
     def activator(self, h):
         pass
@@ -20,8 +24,9 @@ class NonLinearPerceptron(SingleLayerPerceptron, ABC):
         pass
 
     def normalize_outputs(self, outputs):
-        self.min_output = min(outputs)
-        self.max_output = max(outputs)
+        if self.min_output is None and self.max_output is None:
+            self.min_output = min(outputs)
+            self.max_output = max(outputs)
         return [self.normalize_output(output) for output in outputs]
 
     @abstractmethod

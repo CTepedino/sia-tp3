@@ -1,5 +1,5 @@
 {
   "epochs": 100000,
-  "learning_rate": 1e-3,
-  "perceptron": "tanh"
+  "learning_rate": 1e-6,
+  "perceptron": "linear"
 }
