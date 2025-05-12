@@ -5,9 +5,9 @@ import random
 
 import numpy as np
 
-from ref.perceptrons.LinearPerceptron import LinearPerceptron
-from ref.perceptrons.SigmoidPerceptron import SigmoidPerceptron
-from ref.perceptrons.TanhPerceptron import TanhPerceptron
+from perceptrons.LinearPerceptron import LinearPerceptron
+from perceptrons.SigmoidPerceptron import SigmoidPerceptron
+from perceptrons.TanhPerceptron import TanhPerceptron
 
 
 def load_dataset(dataset):

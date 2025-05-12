@@ -1,12 +1,34 @@
 import os
-import numpy as np
+import random
 from PIL import Image
-from perceptron import MultiLayerPerceptron
+from perceptrons.MultiLayerPerceptron import MultiLayerPerceptron
 from activatorFunctions import non_linear_functions
-from sklearn.model_selection import train_test_split
 import argparse
 import json
 from datetime import datetime
+
+
+
+def train_test_split(X, y, labels, test_size=0.2, seed=None):
+    if seed is not None:
+        random.seed(seed)
+
+    indices = list(range(len(X)))
+    random.shuffle(indices)
+
+    split_point = int(len(X) * (1 - test_size))
+    train_indices = indices[:split_point]
+    test_indices = indices[split_point:]
+
+    X_train = [X[i] for i in train_indices]
+    y_train = [y[i] for i in train_indices]
+    labels_train = [labels[i] for i in train_indices]
+
+    X_test = [X[i] for i in test_indices]
+    y_test = [y[i] for i in test_indices]
+    labels_test = [labels[i] for i in test_indices]
+
+    return X_train, X_test, y_train, y_test, labels_train, labels_test
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str, help='Ruta al archivo JSON de configuración (opcional)')
@@ -107,7 +129,7 @@ def main():
 
         # Dividir en conjuntos de entrenamiento y prueba
         X_train, X_test, y_train, y_test, labels_train, labels_test = train_test_split(
-            X, y, labels, test_size=0.2, random_state=42
+            X, y, labels, test_size=0.2, seed=42
         )
 
         print(f"Conjunto de entrenamiento: {len(X_train)} imágenes")

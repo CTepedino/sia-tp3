@@ -1,56 +1,25 @@
+import sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import argparse
 import json
 from datetime import datetime
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--config', type=str, help='Ruta al archivo JSON de configuración (opcional)')
-args = parser.parse_args()
+from perceptrons.StepPerceptron import StepPerceptron
 
-learning_rate = 0.1
-max_epochs = 10
-
-if args.config:
-    try:
-        with open(args.config, 'r') as f:
-            config = json.load(f)
-            learning_rate = config.get('learning_rate', learning_rate)
-            max_epochs = config.get('max_epochs', max_epochs)
-            print(f"Configuración cargada desde {args.config}")
-    except Exception as e:
-        print(f"No se pudo cargar el archivo de configuración: {e}")
-        print("Usando valores por defecto.")
-
-os.makedirs('results', exist_ok=True)
-timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-save_results = "./exer1/results/result_ex1_xor_"+timestamp
-os.makedirs(save_results)
-
-X = np.array([
-    [-1, -1],
-    [-1, 1],
-    [1, -1],
-    [1, 1]
-])
-
-y = np.array([-1, 1, 1, -1])
-
-w = np.random.uniform(-1, 1, 2)
-
-def tita(x):
-    return 1 if x >= 0 else -1
-
-def cantidad_diferencias(xi):
+def differences(xi):
     return int(xi[0] != xi[1])
 
-def transformar_X(X):
-    return np.array([cantidad_diferencias(xi) for xi in X])
+def transform_dataset(X):
+    return [[differences(xi)] for xi in X]
 
 def plot_decision_boundary(X, y, w, epoch, iteration, save_path):
+    X = np.array(X)
+    y = np.array(y)
+    w = np.array(w)
     plt.clf()
-    X_transf = transformar_X(X)
+    X_transf = np.array(transform_dataset(X))
 
     for i in range(len(X)):
         if y[i] == 1:
@@ -60,7 +29,7 @@ def plot_decision_boundary(X, y, w, epoch, iteration, save_path):
 
     if w[1] != 0:
         boundary_x = -w[0]/w[1]
-        plt.plot([boundary_x, boundary_x], [0, 2], 'k--')  
+        plt.plot([boundary_x, boundary_x], [0, 2], 'k--')
 
     plt.xlim(-0.5, 2.5)
     plt.ylim(0.5, 1.5)
@@ -72,29 +41,36 @@ def plot_decision_boundary(X, y, w, epoch, iteration, save_path):
     plt.savefig(save_path)
     plt.close()
 
-# Entrenamiento
-for epoch in range(max_epochs):
-    total_error = 0
-    for iteration, (xi, target) in enumerate(zip(X, y)):
-        xi_transf = np.array([1, cantidad_diferencias(xi)])
-        output = tita(np.dot(w, xi_transf))
-        delta = target - output
-        if output != target:
-            w += learning_rate * target * xi_transf
+if __name__ == "__main__":
+    with open(sys.argv[1], "r") as f:
+        config = json.load(f)
 
-        filename = f'{save_results}/epoch{epoch + 1}_iter{iteration + 1}.png'
-        plot_decision_boundary(X, y, w, epoch, iteration, filename)
-        total_error+= abs(delta)
-    
-    if total_error == 0:
-        print(f"Entrenamiento terminado en la epoca: {epoch+1}")
-        break
-        
+    learning_rate = config["learning_rate"]
+    epochs = config["epochs"]
 
+    os.makedirs('results', exist_ok=True)
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    save_results = "./exer1/results/result_ex1_xor_"+timestamp
+    os.makedirs(save_results)
 
-# Prueba final
-print("Prueba final:")
-for xi in X:
-    xi_transf = np.array([1, cantidad_diferencias(xi)])
-    output = tita(np.dot(w, xi_transf))
-    print(f"Entrada: {xi} -> Salida predicha: {output}")
+    inputs = [
+        [-1, -1],
+        [-1, 1],
+        [1, -1],
+        [1, 1]
+    ]
+
+    expected_outputs = [-1, 1, 1, -1]
+
+    transformed_inputs = transform_dataset(inputs)
+
+    perceptron = StepPerceptron(1, learning_rate)
+
+    perceptron.train(transformed_inputs, expected_outputs, epochs)
+
+    plot_decision_boundary(inputs , expected_outputs, perceptron.weights, epochs, epochs, save_results)
+
+    for x, tx, y in zip(inputs, transformed_inputs, expected_outputs):
+        output = perceptron.test(tx)
+        print(f"IN: {x}, EXPECTED: {y}, PREDICTED: {output}")
+
