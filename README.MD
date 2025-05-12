@@ -75,3 +75,16 @@ El programa recibe un archivo de configuración en formato JSON, en el cual se p
 - max_epochs
 - activator_function
 - optimizer
+
+### Las posibles funciones de activacion son:
+- sigmoid
+- tanh
+- relu
+- softplus
+- mish
+- leaky_relu
+
+### Los posibles optimizadores son:
+- gradient
+- adam
+- momentum
