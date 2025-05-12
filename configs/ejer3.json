@@ -1,6 +1,6 @@
 {
-    "learning_rate": 0.005,
-    "max_epochs": 1000,
+    "learning_rate": 0.001,
+    "max_epochs": 500,
     "activator_function": "leaky_relu",
-    "optimizer": "gradient"
+    "optimizer":"adam"
 }
