@@ -42,7 +42,7 @@ def mse(expected, predicted):
     return 0.5 * ((expected - predicted) ** 2)
 
 if __name__ == "__main__":
-    inputs, outputs = load_dataset("./exer2/TP3-ej2-conjunto.csv")
+    inputs, outputs = load_dataset("./TP3-ej2-conjunto.csv")
 
     with open(sys.argv[1], "r") as f:
         config = json.load(f)
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     folds = k_fold_split(inputs, outputs, k, seed)
     errors = []
-    str_dir = "./exer2/results/"
+    str_dir = "./results/"
     os.makedirs(str_dir, exist_ok=True)
 
     with open(f"{str_dir}generalizations.csv", "a") as f:
