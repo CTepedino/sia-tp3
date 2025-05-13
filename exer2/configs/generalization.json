@@ -1,6 +1,6 @@
 {
-   "partition_count": 7,
-   "epochs": 200000,
-   "learning_rate": 0.00001,
+   "partition_count": 28,
+   "epochs": 225,
+   "learning_rate": 0.01,
    "perceptron": "tanh"
 }
