@@ -138,6 +138,7 @@ class MultiLayerPerceptron:
         min_delta = 1e-5
         window_size = 10
 
+        # Inicializar ADAM si es necesario
         if self.optimizer == "adam":
             self.t = 0
             self.m = [np.zeros_like(np.array(w)) for w in self.weights]
@@ -183,12 +184,13 @@ class MultiLayerPerceptron:
             with open(self.results_file, "a") as f:
                 log_line = f"epoch {epoch + 1} average error - {average_error}\n"
                 f.write(log_line)
-                if (epoch + 1) % 100 == 0:
+                if (epoch + 1) % 10 == 0:
                     print(log_line.strip())
                     if self.optimizer == "adam":
                         print(f"ADAM - t: {self.t}, learning rate: {self.alpha}")
 
         self.weights = copy.deepcopy(self.best_weights)
+        self.error_history = error_history  # Guardar el historial de errores
 
     def test(self, input_data):
         hidden_states, activations = self.forward_propagation(input_data)
