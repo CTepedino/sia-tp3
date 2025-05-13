@@ -40,11 +40,31 @@ uv run .\exer1\xor.py <config_file_path>
 
 ##### Archivo de configuración
 
-El programa recibe un archivo de configuración en formato JSON, en el cual se pueden indicar los siguientes parametros:
+Los programas reciben un archivo de configuración en formato JSON, en el cual se pueden indicar los siguientes parametros:
 
 - learning_rate
-- max_epochs
+- epochs
 
+### Ejercicio 2
+#### Entrenamiento
+
+```bash
+uv run .\exer2\learn.py config_file_path
+```
+
+#### Generalización
+
+```bash
+uv run .\exer2\generalize.py config_file_path
+```
+
+#### Archivo de configuración
+
+El programa recibe un archivo de configuración en formato JSON, en el cual se indican los siguientes parametros:
+- learning_rate
+- epochs
+- perceptron (lineal, tanh o sigmoid)
+- partition_count (para la generalización solamente)
 
 ### Ejercicio 3
 #### Xor
