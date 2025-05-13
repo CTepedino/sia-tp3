@@ -56,7 +56,6 @@ def labels_to_one_hot(labels, num_classes=10):
     return one_hot
 
 def save_state(mlp, results_dir, val_accuracy):
-    """Guarda los pesos y datos del optimizador solo si mejora la precisión en validación"""
     states_dir = "./exer4/estados_entrenamiento"
     os.makedirs(states_dir, exist_ok=True)
     
@@ -85,7 +84,6 @@ def save_state(mlp, results_dir, val_accuracy):
         print(f"No se guardó el estado. Precisión en validación anterior: {prev_accuracy:.2f}% >= Nueva precisión: {val_accuracy:.2f}%")
 
 def load_state():
-    """Carga los pesos y datos del optimizador si existen"""
     states_dir = "./exer4/estados_entrenamiento"
     state_path = os.path.join(states_dir, 'estado_entrenamiento.pkl')
     if os.path.exists(state_path):
