@@ -65,43 +65,57 @@ if __name__ == "__main__":
     os.makedirs(str_dir, exist_ok=True)
 
     with open(f"{str_dir}generalizations.csv", "a") as f:
-        train_error = 0
+        train_sum = 0
+        test_sum = 0
 
-        for i in range(k):
-            test_fold = folds[i]
-            train_folds = [sample for j, fold in enumerate(folds) if j != i for sample in fold]
+        for _ in range(100):
+            fold_errors = []
+            train_error = 0
 
-            train_inputs = [x for x, y in train_folds]
-            train_outputs = [y for x, y in train_folds]
-            test_inputs = [x for x, y in test_fold]
-            test_outputs = [y for x, y in test_fold]
+            for i in range(k):
+                test_fold = folds[i]
+                train_folds = [sample for j, fold in enumerate(folds) if j != i for sample in fold]
 
-
-
-            perceptron = perceptrons[config["perceptron"]](len(inputs[0]), learning_rate, seed=seed)
-            perceptron.set_bounds(output_min, output_max)
-            perceptron.train(train_inputs, train_outputs, epochs)
-            print(f"Training error: {perceptron.error_min}")
-            train_error += perceptron.error_min
-
-            fold_error = 0
-            for x, y in zip(test_inputs, test_outputs):
-                predicted = perceptron.test(x)
-                fold_error += mse(y, predicted)
-                print(f"{x} - real: {y} - predicted: {predicted}")
-            fold_error /= len(test_fold)
-
-            errors.append(fold_error)
-            print(f"Fold {i + 1}: MSE = {fold_error:.4f}")
+                train_inputs = [x for x, y in train_folds]
+                train_outputs = [y for x, y in train_folds]
+                test_inputs = [x for x, y in test_fold]
+                test_outputs = [y for x, y in test_fold]
 
 
-        train_error = train_error / k
-        test_error = sum(errors) / k
 
-        print(f"\nAverage MSE over {k} folds: {test_error:.4f}")
+                perceptron = perceptrons[config["perceptron"]](len(inputs[0]), learning_rate, seed=seed)
+                perceptron.set_bounds(output_min, output_max)
+                perceptron.train(train_inputs, train_outputs, epochs)
+                print(f"Training error: {perceptron.error_min}")
+                train_error += perceptron.error_min
+
+                fold_error = 0
+                for x, y in zip(test_inputs, test_outputs):
+                    predicted = perceptron.test(x)
+                    fold_error += mse(y, predicted)
+                    print(f"{x} - real: {y} - predicted: {predicted}")
+                fold_error /= len(test_fold)
+
+                fold_errors.append(fold_error)
+                print(f"Fold {i + 1}: MSE = {fold_error:.4f}")
+
+
+            train_error = train_error / k
+            test_error = sum(fold_errors) / k
+
+            train_sum += train_error
+
+            errors.append(test_error)
+
+
+            print(f"\nAverage MSE over {k} folds: {test_error:.4f}")
+
+
 
         std_mse = np.std(errors, ddof=1)
+        test_mean = np.mean(errors)
 
-        f.write(f"{config['perceptron']},{learning_rate},{epochs},{k},{train_error},{test_error},{std_mse}\n")
+
+        f.write(f"{config['perceptron']},{learning_rate},{epochs},{k},{train_sum/100},{test_mean},{std_mse}\n")
 
 
