@@ -32,6 +32,9 @@ def train_test_split(X, y, labels, test_size=0.2, seed=None):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str, help='Ruta al archivo JSON de configuración (opcional)')
+parser.add_argument('--data_dir', type=str, default='./training/numeros', help='Directorio con todas las imágenes (modo original)')
+parser.add_argument('--train_dir', type=str, help='Directorio con imágenes de entrenamiento (modo separado)')
+parser.add_argument('--test_dir', type=str, help='Directorio con imágenes de prueba (modo separado)')
 args = parser.parse_args()
 
 learning_rate = 0.01
@@ -121,16 +124,26 @@ def main():
             optimizer
         )
 
-        # Cargar datos
-        data_path = "./training/numeros"
-        print(f"Cargando imágenes desde {data_path}...")
-        X, labels = load_images_from_folder(data_path)
-        y = labels_to_one_hot(labels)
+        # Cargar datos según el modo seleccionado
+        if args.train_dir and args.test_dir:
+            # Modo separado: cargar entrenamiento y prueba por separado
+            print(f"Cargando imágenes de entrenamiento desde {args.train_dir}...")
+            X_train, labels_train = load_images_from_folder(args.train_dir)
+            y_train = labels_to_one_hot(labels_train)
 
-        # Dividir en conjuntos de entrenamiento y prueba
-        X_train, X_test, y_train, y_test, labels_train, labels_test = train_test_split(
-            X, y, labels, test_size=0.2, seed=42
-        )
+            print(f"Cargando imágenes de prueba desde {args.test_dir}...")
+            X_test, labels_test = load_images_from_folder(args.test_dir)
+            y_test = labels_to_one_hot(labels_test)
+        else:
+            # Modo original: cargar todo y dividir
+            print(f"Cargando imágenes desde {args.data_dir}...")
+            X, labels = load_images_from_folder(args.data_dir)
+            y = labels_to_one_hot(labels)
+
+            # Dividir en conjuntos de entrenamiento y prueba
+            X_train, X_test, y_train, y_test, labels_train, labels_test = train_test_split(
+                X, y, labels, test_size=0.2, seed=42
+            )
 
         print(f"Conjunto de entrenamiento: {len(X_train)} imágenes")
         print(f"Conjunto de prueba: {len(X_test)} imágenes")
@@ -174,6 +187,15 @@ def main():
                 f.write(f"{prediction},{label}\n")
         
         print(f"\nPrecisión en prueba: {correct_test/len(X_test)*100:.2f}%")
+
+        # Escribir información de entrenamiento
+        training_info_path = os.path.join(dir_name, f"training_info_{timestamp}.txt")
+        with open(training_info_path, "w") as f:
+            f.write("epoca,error_medio\n")
+            for epoch, error in enumerate(mlp.error_history):
+                if (epoch + 1) % 10 == 0:  # Cada 10 épocas
+                    f.write(f"{epoch + 1},{error}\n")
+            f.write(f"\nTotal de epocas recorridas: {len(mlp.error_history)}\n")
 
     except Exception as e:
         print(f"Error durante la ejecución: {str(e)}")
