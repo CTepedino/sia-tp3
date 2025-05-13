@@ -27,7 +27,7 @@ if __name__ == "__main__":
     with open(sys.argv[1], "r") as f:
         config = json.load(f)
 
-    inputs, outputs = load_dataset("./TP3-ej2-conjunto.csv")
+    inputs, outputs = load_dataset("./exer2/TP3-ej2-conjunto.csv")
 
     seed = None
     if "seed" in config:

@@ -42,7 +42,7 @@ def mse(expected, predicted):
     return 0.5 * ((expected - predicted) ** 2)
 
 if __name__ == "__main__":
-    inputs, outputs = load_dataset("./TP3-ej2-conjunto.csv")
+    inputs, outputs = load_dataset("./exer2/TP3-ej2-conjunto.csv")
 
     output_max = max(outputs)
     output_min = min(outputs)
