@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 import os
 import json
 from datetime import datetime
-
+root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(root_dir)
 from perceptrons.StepPerceptron import StepPerceptron
 
 def differences(xi):

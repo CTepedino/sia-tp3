@@ -12,7 +12,7 @@ sys.path.append(root_dir)
 from exer3.perceptrons.MultiLayerPerceptron import MultiLayerPerceptron
 from exer3.activatorFunctions import non_linear_functions
 
-def cargar_mnist(subset_size=3000):
+def cargar_mnist(subset_size=25000):
     print("Cargando dataset MNIST...")
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
     
@@ -106,8 +106,8 @@ def main():
     y_test_oh = labels_to_one_hot(y_test)
 
     # 2. Configurar MLP con hiperparámetros recomendados
-    learning_rate = 0.0001
-    max_epochs = 30
+    learning_rate = 0.00005
+    max_epochs = 5
     activ_fn_str = "leaky_relu"
     optimizer = "adam"
     arquitectura = [784, 128, 64, 10]  # Arquitectura más compacta
