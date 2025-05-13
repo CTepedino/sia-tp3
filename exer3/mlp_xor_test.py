@@ -8,7 +8,7 @@ parser.add_argument('--config', type=str, help='Ruta al archivo JSON de configur
 args = parser.parse_args()
 
 learning_rate = 0.1
-max_epochs = 1000
+max_epochs = 5000
 activ_fn_str = "tanh"
 optimizer = "gradient"  # valor por defecto
 
