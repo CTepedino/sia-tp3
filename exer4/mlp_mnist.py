@@ -5,31 +5,31 @@ from tensorflow.keras.datasets import mnist
 import pickle
 import time
 from datetime import datetime
-# Agregar el directorio raíz al path
+
 root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_dir)
 
 from exer3.perceptrons.MultiLayerPerceptron import MultiLayerPerceptron
 from exer3.activatorFunctions import non_linear_functions
 
-def cargar_mnist(subset_size=25000):
+def load_mnist(subset_size=1000):
     print("Cargando dataset MNIST...")
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
     
-    # Separar los primeros 10000 ejemplos para validación
+    
     val_size = 10000
     x_val = x_train[:val_size]
     y_val = y_train[:val_size]
-    x_train = x_train[val_size:]  # Quedan 50000 ejemplos
+    x_train = x_train[val_size:]  
     y_train = y_train[val_size:]
     
-    # Usar todo el dataset si subset_size es 50000
+    
     if subset_size == 50000:
         print("Usando todo el conjunto de entrenamiento restante (50,000 imágenes)")
         print("Usando conjunto de validación (10,000 imágenes)")
         print("Usando conjunto de prueba (10,000 imágenes)")
     else:
-        # Seleccionar elementos aleatorios del dataset restante
+      
         indices = np.random.permutation(len(x_train))[:subset_size]
         x_train = x_train[indices]
         y_train = y_train[indices]
@@ -41,7 +41,7 @@ def cargar_mnist(subset_size=25000):
     print(f"Forma de x_val: {x_val.shape}")
     print(f"Forma de x_test: {x_test.shape}")
     
-    # Normalizar y aplanar
+    
     x_train = x_train.reshape(-1, 28*28) / 255.0
     x_val = x_val.reshape(-1, 28*28) / 255.0
     x_test = x_test.reshape(-1, 28*28) / 255.0
@@ -55,81 +55,81 @@ def labels_to_one_hot(labels, num_classes=10):
         one_hot.append(vec)
     return one_hot
 
-def guardar_estado(mlp, results_dir, precision_val):
+def save_state(mlp, results_dir, val_accuracy):
     """Guarda los pesos y datos del optimizador solo si mejora la precisión en validación"""
-    estados_dir = "./exer4/estados_entrenamiento"
-    os.makedirs(estados_dir, exist_ok=True)
+    states_dir = "./exer4/estados_entrenamiento"
+    os.makedirs(states_dir, exist_ok=True)
     
-    # Verificar si existe un estado previo y su precisión
-    estado_path = os.path.join(estados_dir, 'estado_entrenamiento.pkl')
-    precision_anterior = 0
     
-    if os.path.exists(estado_path):
-        with open(estado_path, 'rb') as f:
-            estado_previo = pickle.load(f)
-            if 'precision_val' in estado_previo:
-                precision_anterior = estado_previo['precision_val']
+    state_path = os.path.join(states_dir, 'estado_entrenamiento.pkl')
+    prev_accuracy = 0
     
-    # Solo guardar si mejora la precisión en validación
-    if precision_val > precision_anterior:
-        estado = {
+    if os.path.exists(state_path):
+        with open(state_path, 'rb') as f:
+            prev_state = pickle.load(f)
+            if 'precision_val' in prev_state:
+                prev_accuracy = prev_state['precision_val']
+    
+    
+    if val_accuracy > prev_accuracy:
+        state = {
             'weights': mlp.weights,
             'adam_data': mlp.optimizer.get_state() if hasattr(mlp.optimizer, 'get_state') else None,
-            'precision_val': precision_val
+            'precision_val': val_accuracy
         }
-        with open(estado_path, 'wb') as f:
-            pickle.dump(estado, f)
-        print(f"Estado de entrenamiento guardado en: {estados_dir}")
-        print(f"Precisión en validación anterior: {precision_anterior:.2f}% -> Nueva precisión: {precision_val:.2f}%")
+        with open(state_path, 'wb') as f:
+            pickle.dump(state, f)
+        print(f"Estado de entrenamiento guardado en: {states_dir}")
+        print(f"Precisión en validación anterior: {prev_accuracy:.2f}% -> Nueva precisión: {val_accuracy:.2f}%")
     else:
-        print(f"No se guardó el estado. Precisión en validación anterior: {precision_anterior:.2f}% >= Nueva precisión: {precision_val:.2f}%")
+        print(f"No se guardó el estado. Precisión en validación anterior: {prev_accuracy:.2f}% >= Nueva precisión: {val_accuracy:.2f}%")
 
-def cargar_estado():
+def load_state():
     """Carga los pesos y datos del optimizador si existen"""
-    estados_dir = "./exer4/estados_entrenamiento"
-    estado_path = os.path.join(estados_dir, 'estado_entrenamiento.pkl')
-    if os.path.exists(estado_path):
-        with open(estado_path, 'rb') as f:
-            estado = pickle.load(f)
-        print("Estado de entrenamiento cargado desde:", estados_dir)
-        return estado
+    states_dir = "./exer4/estados_entrenamiento"
+    state_path = os.path.join(states_dir, 'estado_entrenamiento.pkl')
+    if os.path.exists(state_path):
+        with open(state_path, 'rb') as f:
+            state = pickle.load(f)
+        print("Estado de entrenamiento cargado desde:", states_dir)
+        return state
     return None
 
 def main():
-    # Iniciar medición de tiempo total
-    tiempo_inicio_total = time.time()
+    
+    total_start_time = time.time()
 
-    # 1. Cargar y preparar datos (usando todo el dataset)
-    x_train, y_train, x_val, y_val, x_test, y_test = cargar_mnist()
+    
+    x_train, y_train, x_val, y_val, x_test, y_test = load_mnist()
     y_train_oh = labels_to_one_hot(y_train)
     y_val_oh = labels_to_one_hot(y_val)
     y_test_oh = labels_to_one_hot(y_test)
 
-    # 2. Configurar MLP con hiperparámetros recomendados
+    
     learning_rate = 0.00005
     max_epochs = 5
     activ_fn_str = "leaky_relu"
     optimizer = "adam"
-    arquitectura = [784, 128, 64, 10]  # Arquitectura más compacta
+    architecture = [784, 128, 64, 10]  
 
-    # Crear directorio para resultados si no existe
+    
     results_dir = f"./exer4/results/mnist_results"
     os.makedirs(results_dir, exist_ok=True)
 
-    # Guardar configuración
+    
     config_path = os.path.join(results_dir, "config.txt")
     with open(config_path, "w") as f:
-        f.write("Configuracion del entrenamiento:\n")
-        f.write(f"Arquitectura: {arquitectura}\n")
+        f.write("Configuración del entrenamiento:\n")
+        f.write(f"Arquitectura: {architecture}\n")
         f.write(f"Learning rate: {learning_rate}\n")
-        f.write(f"Epocas: {max_epochs}\n")
-        f.write(f"Funcion de activación: {activ_fn_str}\n")
+        f.write(f"Épocas: {max_epochs}\n")
+        f.write(f"Función de activación: {activ_fn_str}\n")
         f.write(f"Optimizador: {optimizer}\n")
-        f.write(f"Dataset size: {len(x_train)} imágenes de entrenamiento\n")
-        f.write(f"Test size: {len(x_test)} imágenes de prueba\n")
+        f.write(f"Tamaño del dataset: {len(x_train)} imágenes de entrenamiento\n")
+        f.write(f"Tamaño de prueba: {len(x_test)} imágenes de prueba\n")
 
     print("\nConfigurando MLP...")
-    print(f"Arquitectura: {arquitectura}")
+    print(f"Arquitectura: {architecture}")
     print(f"Learning rate: {learning_rate}")
     print(f"Épocas: {max_epochs}")
     print(f"Función de activación: {activ_fn_str}")
@@ -137,27 +137,27 @@ def main():
 
     activ_fn, activ_fn_deriv = non_linear_functions[activ_fn_str]
     mlp = MultiLayerPerceptron(
-        arquitectura,
+        architecture,
         learning_rate,
         activ_fn,
         activ_fn_deriv,
         optimizer
     )
 
-    # Intentar cargar estado previo si existe
-    estado_previo = cargar_estado()
-    if estado_previo:
-        mlp.weights = estado_previo['weights']
-        if estado_previo['adam_data'] and hasattr(mlp.optimizer, 'set_state'):
-            mlp.optimizer.set_state(estado_previo['adam_data'])
+    
+    prev_state = load_state()
+    if prev_state:
+        mlp.weights = prev_state['weights']
+        if prev_state['adam_data'] and hasattr(mlp.optimizer, 'set_state'):
+            mlp.optimizer.set_state(prev_state['adam_data'])
 
-    # 3. Entrenar
+   
     print("\nEntrenando el MLP sobre MNIST...")
-    tiempo_inicio_entrenamiento = time.time()
+    training_start_time = time.time()
     mlp.train(x_train, y_train_oh, epochs=max_epochs)
-    tiempo_entrenamiento = time.time() - tiempo_inicio_entrenamiento
+    training_time = time.time() - training_start_time
 
-    # 4. Evaluar en conjunto de validación
+    
     print("\nEvaluando en el conjunto de validación:")
     correct_val = 0
     total_val = len(x_val)
@@ -168,18 +168,18 @@ def main():
         if prediction == label:
             correct_val += 1
 
-    precision_val = (correct_val / total_val) * 100
-    print(f"\nPrecisión en validación: {precision_val:.2f}%")
+    val_accuracy = (correct_val / total_val) * 100
+    print(f"\nPrecisión en validación: {val_accuracy:.2f}%")
 
-    # Guardar estado solo si mejora la precisión en validación
-    guardar_estado(mlp, results_dir, precision_val)
+    
+    save_state(mlp, results_dir, val_accuracy)
 
-    # 5. Evaluar en conjunto de prueba (solo al final)
+    
     print("\nEvaluando en el conjunto de prueba:")
     correct_test = 0
     total_test = len(x_test)
     
-    # Guardar resultados de predicciones
+    
     predictions_path = os.path.join(results_dir, "predictions.txt")
     with open(predictions_path, "w") as f:
         f.write("imagen,real,prediccion,correcto\n")
@@ -191,32 +191,32 @@ def main():
             if is_correct:
                 correct_test += 1
             
-            # Guardar predicción
+            
             f.write(f"{i},{label},{prediction},{1 if is_correct else 0}\n")
             
-            # Mostrar progreso cada 200 imágenes
+            
             if (i + 1) % 200 == 0:
                 print(f"Procesadas {i + 1}/{total_test} imágenes...")
 
-    precision_test = (correct_test / total_test) * 100
-    print(f"\nPrecisión en prueba: {precision_test:.2f}%")
+    test_accuracy = (correct_test / total_test) * 100
+    print(f"\nPrecisión en prueba: {test_accuracy:.2f}%")
 
-    # Calcular tiempo total
-    tiempo_total = time.time() - tiempo_inicio_total
+    
+    total_time = time.time() - total_start_time
 
-    # Guardar resumen final
+    
     summary_path = os.path.join(results_dir, "summary.txt")
     with open(summary_path, "w") as f:
-        f.write(f"Precisión en validación: {precision_val:.2f}%\n")
-        f.write(f"Precisión final en prueba: {precision_test:.2f}%\n")
+        f.write(f"Precisión en validación: {val_accuracy:.2f}%\n")
+        f.write(f"Precisión final en prueba: {test_accuracy:.2f}%\n")
         f.write(f"Total de imágenes correctas en prueba: {correct_test}/{total_test}\n")
         f.write(f"Error final: {mlp.error_history[-1]}\n")
-        f.write(f"Tiempo de entrenamiento: {tiempo_entrenamiento:.2f} segundos\n")
-        f.write(f"Tiempo total de ejecución: {tiempo_total:.2f} segundos\n")
+        f.write(f"Tiempo de entrenamiento: {training_time:.2f} segundos\n")
+        f.write(f"Tiempo total de ejecución: {total_time:.2f} segundos\n")
 
     print(f"\nResultados guardados en: {results_dir}")
-    print(f"Tiempo de entrenamiento: {tiempo_entrenamiento:.2f} segundos")
-    print(f"Tiempo total: {tiempo_total:.2f} segundos")
+    print(f"Tiempo de entrenamiento: {training_time:.2f} segundos")
+    print(f"Tiempo total: {total_time:.2f} segundos")
 
 if __name__ == "__main__":
     main() 
