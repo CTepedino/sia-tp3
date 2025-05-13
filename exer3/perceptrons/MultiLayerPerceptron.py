@@ -187,7 +187,7 @@ class MultiLayerPerceptron:
             with open(self.results_file, "a") as f:
                 log_line = f"epoch {epoch + 1} average error - {average_error}\n"
                 f.write(log_line)
-                if (epoch + 1) % 10 == 0:
+                if (epoch + 1) % 1 == 0:
                     print(log_line.strip())
                     if self.optimizer == "adam":
                         print(f"ADAM - t: {self.t}, learning rate: {self.alpha}")
