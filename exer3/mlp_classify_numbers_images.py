@@ -37,7 +37,7 @@ parser.add_argument('--train_dir', type=str, help='Directorio con imágenes de e
 parser.add_argument('--test_dir', type=str, help='Directorio con imágenes de prueba (modo separado)')
 args = parser.parse_args()
 
-learning_rate = 0.01
+learning_rate = 0.001
 max_epochs = 1000
 activ_fn_str = "leaky_relu"
 optimizer = "gradient"  # valor por defecto
@@ -59,12 +59,11 @@ if args.config:
         print(f"No se pudo cargar el archivo de configuración: {e}")
         print("Usando valores por defecto.")
 
-# Cargar imágenes y labels
 def load_image_as_array(path_imagen, image_size=(28, 28)):
     try:
         with Image.open(path_imagen) as img:
-            img = img.convert("L")  # escala de grises
-            img = img.resize(image_size)  # asegurate que todos tengan la misma forma
+            img = img.convert("L")  
+            img = img.resize(image_size) 
             pixeles = list(img.getdata())
             normalizado = [p / 255.0 for p in pixeles]
             return normalizado
@@ -103,7 +102,6 @@ def load_images_from_folder(folder_path, image_size=(28, 28)):
 
     return samples, labels
 
-# Convertir a vectores one-hot
 def labels_to_one_hot(labels, num_classes=10):
     one_hot = []
     for label in labels:
@@ -114,7 +112,6 @@ def labels_to_one_hot(labels, num_classes=10):
 
 def main():
     try:
-        # Configurar MLP
         activ_fn, activ_fn_deriv = non_linear_functions[activ_fn_str]
         mlp = MultiLayerPerceptron(
             [784, 30, 10],  # 784 = 28x28 píxeles
@@ -124,9 +121,7 @@ def main():
             optimizer
         )
 
-        # Cargar datos según el modo seleccionado
         if args.train_dir and args.test_dir:
-            # Modo separado: cargar entrenamiento y prueba por separado
             print(f"Cargando imágenes de entrenamiento desde {args.train_dir}...")
             X_train, labels_train = load_images_from_folder(args.train_dir)
             y_train = labels_to_one_hot(labels_train)
@@ -135,12 +130,9 @@ def main():
             X_test, labels_test = load_images_from_folder(args.test_dir)
             y_test = labels_to_one_hot(labels_test)
         else:
-            # Modo original: cargar todo y dividir
             print(f"Cargando imágenes desde {args.data_dir}...")
             X, labels = load_images_from_folder(args.data_dir)
             y = labels_to_one_hot(labels)
-
-            # Dividir en conjuntos de entrenamiento y prueba
             X_train, X_test, y_train, y_test, labels_train, labels_test = train_test_split(
                 X, y, labels, test_size=0.2, seed=42
             )
@@ -148,11 +140,9 @@ def main():
         print(f"Conjunto de entrenamiento: {len(X_train)} imágenes")
         print(f"Conjunto de prueba: {len(X_test)} imágenes")
 
-        # Entrenar
         print("Iniciando entrenamiento...")
         mlp.train(X_train, y_train, epochs=max_epochs)
 
-        # Evaluar en conjunto de entrenamiento
         print("\nEvaluación en conjunto de entrenamiento:")
         correct_train = 0
         for i, (x, label) in enumerate(zip(X_train, labels_train)):
@@ -170,8 +160,7 @@ def main():
         results_path = os.path.join(dir_name, f"results_{timestamp}.txt")
 
         with open(results_path, "w") as f:
-            f.write("prediccion,resultado\n")  # Escribir el encabezado
-
+            f.write("prediccion,resultado\n")  
             print("\nEvaluación en conjunto de prueba:")
             correct_test = 0
             for i, (x, label) in enumerate(zip(X_test, labels_test)):
@@ -180,20 +169,17 @@ def main():
                 if prediction == label:
                     correct_test += 1
 
-                # Imprimir en consola
                 print(f"Imagen {i}: Real={label}, Predicción={prediction} {'✅' if prediction == label else '❌'}")
 
-                # Escribir en el archivo
                 f.write(f"{prediction},{label}\n")
         
         print(f"\nPrecisión en prueba: {correct_test/len(X_test)*100:.2f}%")
 
-        # Escribir información de entrenamiento
         training_info_path = os.path.join(dir_name, f"training_info_{timestamp}.txt")
         with open(training_info_path, "w") as f:
             f.write("epoca,error_medio\n")
             for epoch, error in enumerate(mlp.error_history):
-                if (epoch + 1) % 10 == 0:  # Cada 10 épocas
+                if (epoch + 1) % 10 == 0:  
                     f.write(f"{epoch + 1},{error}\n")
             f.write(f"\nTotal de epocas recorridas: {len(mlp.error_history)}\n")
 

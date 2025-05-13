@@ -31,11 +31,11 @@ El programa se ejecuta desde consola utilizando uv run:
 ### Ejercicio 1
 #### And
 ```bash
-uv run .\exer1\and.py <config_file_path>
+uv run .\exer1\and.py --config <config_file_path>
 ```
 #### Xor
 ```bash
-uv run .\exer1\xor.py <config_file_path>
+uv run .\exer1\xor.py --config <config_file_path>
 ```
 
 ##### Archivo de configuración
@@ -49,13 +49,13 @@ Los programas reciben un archivo de configuración en formato JSON, en el cual s
 #### Entrenamiento
 
 ```bash
-uv run .\exer2\learn.py config_file_path
+uv run .\exer2\learn.py --config <config_file_path>
 ```
 
 #### Generalización
 
 ```bash
-uv run .\exer2\generalize.py config_file_path
+uv run .\exer2\generalize.py --config <config_file_path>
 ```
 
 #### Archivo de configuración

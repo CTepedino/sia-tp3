@@ -33,7 +33,9 @@ def extract_accuracy_from_file(file_path):
 
 def extract_lr_from_folder_name(folder_name):
     try:
+        # print(f"Extracting LR from folder: {folder_name}")
         return float(folder_name.split("_")[-1].replace("e", "E"))  # Soporta notación científica
+        
     except:
         return None
 
@@ -55,10 +57,12 @@ def main(directories):
         
         accuracy = extract_accuracy_from_file(first_file_path)
         
-        lr = extract_lr_from_folder_name(os.path.basename(dir_path))
+        lr = extract_lr_from_folder_name(os.path.basename(dir_path.rstrip("/\\")))
+
         
         if accuracy is None or lr is None:
-            print(f"[WARN] Accuracy o LR inválido en {dir_path}")
+            print(f"accuracy {accuracy} y lr {lr} inválidos en {dir_path}")
+            # print(f"[WARN] Accuracy o LR inválido en {dir_path}")
             continue
 
         if "leaky_relu" in dir_path:

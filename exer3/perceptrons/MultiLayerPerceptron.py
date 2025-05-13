@@ -27,7 +27,10 @@ class MultiLayerPerceptron:
             inputs = layers[i] + 1 
             # Xavier/Glorot initialization: scale = sqrt(2.0 / (fan_in + fan_out))
             scale = np.sqrt(2.0 / (inputs + neurons))
-            self.weights.append(np.random.normal(0, scale, (neurons, inputs)).tolist())
+            if activator_function == "relu":
+                self.weights.append(abs(np.random.normal(0, scale, (neurons, inputs)).tolist()))
+            else:
+                self.weights.append(np.random.normal(0, scale, (neurons, inputs)).tolist())
 
         self.min_error = None
         self.best_weights = None
